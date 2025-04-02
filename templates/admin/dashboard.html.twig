@@ -1,0 +1,20 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title 'Bienvenue dans l\'administration du Krabs' %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Utilisateurs</div>
+                <div class="card-body">
+                    <h5 class="card-title">Gestion des utilisateurs</h5>
+                    <p class="card-text">Gérez les comptes utilisateurs, les rôles et les informations personnelles.</p>
+                    <a href="{{ ea_url().setController('App\\\Controller\\\Admin\\\UserCrudController') }}" class="btn btn-primary">Voir les utilisateurs</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ajoutez d'autres cartes pour vos autres entités -->
+    </div>
+{% endblock %}
