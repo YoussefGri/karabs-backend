@@ -117,7 +117,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
+// À ajouter dans la classe User
+public function removeCategory(Categorie $category): self
+{
+    if ($this->categories->contains($category)) {
+        $this->categories->removeElement($category);
+        $category->getUsers()->removeElement($this);
+    }
+    return $this;
+}
     /**
      * Returning a salt is only needed, if you are not using a modern
      * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.

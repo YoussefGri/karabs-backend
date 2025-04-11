@@ -37,6 +37,22 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-users', User::class);
         // Ajoutez d'autres éléments de menu pour vos entités
+        // Section Enseignes
+        yield MenuItem::section('Gestion Commerces');
+        yield MenuItem::linkToCrud('Enseignes', 'fas fa-store', Enseigne::class)
+            ->setController(EnseigneCrudController::class);
+        yield MenuItem::linkToCrud('Horaires', 'far fa-clock', Horaire::class)
+            ->setController(HoraireCrudController::class);
+        
+        // Section Evaluations
+        yield MenuItem::section('Evaluations');
+        yield MenuItem::linkToCrud('Notes', 'fas fa-star', Notation::class)
+            ->setController(NotationCrudController::class);
+        yield MenuItem::linkToCrud('Catégories', 'fas fa-tags', Categorie::class)
+            ->setController(CategorieCrudController::class);
+        
+        // Liens utiles
+        yield MenuItem::section('Navigation');
         
         // Lien vers le site principal
         yield MenuItem::linkToUrl('Retour au site', 'fas fa-arrow-left', '/');

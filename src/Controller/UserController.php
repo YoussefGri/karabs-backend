@@ -36,6 +36,12 @@ class UserController extends AbstractController
         $this->slugger = $slugger;
     }
 
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->disable(Action::DELETE); 
+    }
+
     #[Route("/api/user/update", name:"api_user_update", methods:["PUT"])]
     public function updateProfile(Request $request): JsonResponse
     {
