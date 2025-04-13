@@ -6,6 +6,9 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use App\Entity\Enseigne;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -48,6 +51,46 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string', length: 5, nullable: true)]
     private $codePostal;
+
+    #[ORM\ManyToMany(targetEntity: Enseigne::class, mappedBy: 'favoris')]
+    private Collection $enseignesFavorites;
+
+        public function __construct()
+    {
+        $this->enseignesFavorites = new ArrayCollection();
+    }
+
+
+    public function getFavoris(): Collection
+    {
+        return $this->enseignesFavorites;
+    }
+
+    public function getFavorisIds(): array
+    {
+        return array_map(fn(Enseigne $e) => $e->getId(), $this->enseignesFavorites->toArray());
+    }
+
+    public function addFavori(Enseigne $enseigne): self
+    {
+        if (!$this->enseignesFavorites->contains($enseigne)) {
+            $this->enseignesFavorites->add($enseigne);
+            $enseigne->addFavori($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavori(Enseigne $enseigne): self
+    {
+        if ($this->enseignesFavorites->removeElement($enseigne)) {
+            $enseigne->removeFavori($this);
+        }
+
+        return $this;
+    }
+
+
 
     public function getId(): ?int
     {
@@ -117,15 +160,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-// À ajouter dans la classe User
-public function removeCategory(Categorie $category): self
-{
-    if ($this->categories->contains($category)) {
-        $this->categories->removeElement($category);
-        $category->getUsers()->removeElement($this);
-    }
-    return $this;
-}
+// // À ajouter dans la classe User
+//     public function removeCategory(Categorie $category): self
+//     {
+//         if ($this->categories->contains($category)) {
+//             $this->categories->removeElement($category);
+//             $category->getUsers()->removeElement($this);
+//         }
+//         return $this;
+//     }
     /**
      * Returning a salt is only needed, if you are not using a modern
      * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.

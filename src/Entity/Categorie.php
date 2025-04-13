@@ -73,33 +73,33 @@ public function getEnseignes(): Collection
         return $this;
     }
 
-   /**
- * @return Collection<int, User>
- */
-public function getUsers(): Collection
-{
-    if ($this->users === null) {
-        $this->users = new ArrayCollection();
-    }
-    return $this->users;
-}
+//    /**
+//  * @return Collection<int, User>
+//  */
+// public function getUsers(): Collection
+// {
+//     if ($this->users === null) {
+//         $this->users = new ArrayCollection();
+//     }
+//     return $this->users;
+// }
 
-    public function addUser(User $user): self
-    {
-        if (!$this->getUsers()->contains($user)) {
-            $this->getUsers()->add($user);
-            $user->addCategory($this);
-        }
-        return $this;
-    }
+//     public function addUser(User $user): self
+//     {
+//         if (!$this->getUsers()->contains($user)) {
+//             $this->getUsers()->add($user);
+//             $user->addCategory($this);
+//         }
+//         return $this;
+//     }
 
-    public function removeUser(User $user): self
-    {
-        if ($this->getUsers()->removeElement($user)) {
-            $user->removeCategory($this);
-        }
-        return $this;
-    }
+//     public function removeUser(User $user): self
+//     {
+//         if ($this->getUsers()->removeElement($user)) {
+//             $user->removeCategory($this);
+//         }
+//         return $this;
+//     }
 
     #[ORM\PreRemove]
     public function onPreRemove(PreRemoveEventArgs $args): void
