@@ -63,72 +63,43 @@ public function getEnseignesByCategory(string $name, EntityManagerInterface $em)
     ]);
 }
 
-    
-// #[Route('/api/enseignes/by-category/{name}', name: 'enseignes_by_category', methods: ['GET'])]
-// public function getEnseignesByCategory(string $name, EntityManagerInterface $em): JsonResponse
-// {
-//     $enseignes = $em->getRepository(Enseigne::class);
+#[Route('/api/map', name: 'map_enseignes', methods: ['GET'])]
+public function getEnseignesForMap(EntityManagerInterface $em): JsonResponse
+{
+    $enseignes = $em->getRepository(Enseigne::class)->findAll();
 
-
-//     if (strtolower($name) === 'toutes') {
-//         $enseignes = $enseignes->findAll();
-//     } else {
-//         $enseignes = $enseignes->createQueryBuilder('e')
-//         ->join('e.categories', 'c')
-//         ->where('c.nom = :name')
-//         ->setParameter('name', $name)
-//         ->getQuery()
-//         ->getResult();
-//     }
-
-//     $data = array_map(function (Enseigne $e) use ($em) {
-//         $noteMoyenne = $em->createQueryBuilder()
-//             ->select('AVG(n.note)')
-//             ->from('App\Entity\Notation', 'n')
-//             ->where('n.enseigne = :enseigne')
-//             ->setParameter('enseigne', $e)
-//             ->getQuery()
-//             ->getSingleScalarResult();
-
-//         return [
-//             'id' => $e->getId(),
-//             'nom' => $e->getNom(),
-//             'description' => $e->getDescription(),
-//             'adresse' => $e->getAdresse(),
-//             'numeroTelephone' => $e->getNumeroTelephone(),
-//             'photo' => $e->getPhoto(),
-//             'noteMoyenne' => round((float) $noteMoyenne, 1),
-//         ];
-//     }, $enseignes);
-
-//     return $this->json($data);
-// }
-
-    
-    /*
-    #[Route('/api/enseignes/by-category/{name}', name: 'enseignes_by_category', methods: ['GET'])]
-    public function getEnseignesByCategory(string $name, EntityManagerInterface $em): JsonResponse
-    {
-        $enseignes = $em->getRepository(Enseigne::class)
-            ->createQueryBuilder('e')
-            ->join('e.categories', 'c')
-            ->where('c.nom = :name')
-            ->setParameter('name', $name)
+    $data = array_map(function (Enseigne $e) use ($em) {
+        $noteMoyenne = $em->createQueryBuilder()
+            ->select('AVG(n.note)')
+            ->from('App\Entity\Notation', 'n')
+            ->where('n.enseigne = :enseigne')
+            ->setParameter('enseigne', $e)
             ->getQuery()
-            ->getResult();
+            ->getSingleScalarResult();
 
-        $data = array_map(function (Enseigne $e) {
-            return [
-                'id' => $e->getId(),
-                'nom' => $e->getNom(),
-                'adresse' => $e->getAdresse(),
-                'numeroTelephone' => $e->getNumeroTelephone(),
-                'photo' => $e->getPhoto(),
-            ];
-        }, $enseignes);
+        // Extraire latitude / longitude depuis gps_location
+        [$lat, $lng] = explode(',', $e->getGpsLocation());
 
-        return $this->json($data);
-    }
-        */
+        return [
+            'id' => $e->getId(),
+            'nom' => $e->getNom(),
+            'noteMoyenne' => round((float) $noteMoyenne, 1),
+            'lat' => (float) $lat,
+            'lng' => (float) $lng,
+            'photo' => $e->getPhoto(),
+            'numeroTelephone' => $e->getNumeroTelephone(),
+            'adresse' => $e->getAdresse(),
+            'categories'=> $e->getCategories()->map(function ($c) {
+                return [
+                    'id' => $c->getId(),
+                    'nom' => $c->getNom()
+                ];
+            })->toArray(),
+        ];
+    }, $enseignes);
+
+    return $this->json($data);
+}
+
 
 }
