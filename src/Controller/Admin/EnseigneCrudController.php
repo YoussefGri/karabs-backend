@@ -42,7 +42,15 @@ class EnseigneCrudController extends AbstractCrudController
             NumberField::new('noteSeuil'),
             ArrayField::new('pointsCle')->hideOnIndex(),
             TextField::new('gpsLocation'),
-            AssociationField::new('categories')
+            NumberField::new('notePrix'),
+            NumberField::new('noteQualite'),
+            NumberField::new('noteAmbiance'),
+            NumberField::new('noteACM'),
+            NumberField::new('nombreVotesPrix'),
+            NumberField::new('nombreVotesQualite'),
+            TextField::new('slogan'),
+            NumberField::new('nombreVotesAmbiance'),
+            AssociationField::new(propertyName: 'categories')
                 ->autocomplete()
         ];
     }

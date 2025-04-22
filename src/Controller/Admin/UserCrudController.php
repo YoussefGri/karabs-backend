@@ -14,7 +14,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
+use Doctrine\ORM\EntityManagerInterface; // Ajoutez cet import correct
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 class UserCrudController extends AbstractCrudController
 {
 
@@ -43,6 +44,10 @@ class UserCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             EmailField::new('email'),
+            TextField::new('plainPassword', 'Mot de passe')
+            ->setFormType(\Symfony\Component\Form\Extension\Core\Type\PasswordType::class)
+            ->setRequired(false)
+            ->onlyOnForms(),
             TextField::new('nom'),
             TextField::new('prenom'),
             TextField::new('ville')->hideOnIndex(),
@@ -64,7 +69,26 @@ class UserCrudController extends AbstractCrudController
                 ->hideOnIndex(),
         ];
     }
-
+    public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $this->updateUserPassword($entityInstance);
+        parent::persistEntity($entityManager, $entityInstance);
+    }
+    
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $this->updateUserPassword($entityInstance);
+        parent::updateEntity($entityManager, $entityInstance);
+    }
+    
+    private function updateUserPassword(User $user): void
+    {
+        if (method_exists($user, 'getPlainPassword') && $user->getPlainPassword()) {
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $user->getPlainPassword());
+            $user->setPassword($hashedPassword);
+            $user->eraseCredentials(); // Supprime le plainPassword
+        }
+    }
     public function configureActions(Actions $actions): Actions
     {
         return $actions

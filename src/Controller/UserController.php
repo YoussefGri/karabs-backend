@@ -13,6 +13,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 
 class UserController extends AbstractController
 {
@@ -21,19 +23,23 @@ class UserController extends AbstractController
     private $validator;
     private $security;
     private $slugger;
+    private $passwordHasher;
 
     public function __construct(
         EntityManagerInterface $em,
         UserRepository $userRepository,
         ValidatorInterface $validator,
         Security $security,
-        SluggerInterface $slugger
+        SluggerInterface $slugger,
+        UserPasswordHasherInterface $passwordHasher
+
     ) {
         $this->em = $em;
         $this->userRepository = $userRepository;
         $this->validator = $validator;
         $this->security = $security;
         $this->slugger = $slugger;
+        $this->passwordHasher = $passwordHasher;
     }
 
     public function configureActions(Actions $actions): Actions
@@ -60,7 +66,24 @@ class UserController extends AbstractController
                 return $this->json(['message' => 'Cet email est déjà utilisé'], Response::HTTP_BAD_REQUEST);
             }
         }
+        if (!isset($data['currentPassword']) || !isset($data['newPassword'])) {
+            return $this->json(['message' => 'Données manquantes'], Response::HTTP_BAD_REQUEST);
+        }
         
+        // Vérifier que l'ancien mot de passe est correct
+        if (!$this->passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
+            return $this->json(['message' => 'Mot de passe actuel incorrect'], Response::HTTP_BAD_REQUEST);
+        }
+        
+        // Vérifier que le nouveau mot de passe est assez fort
+        if (strlen($data['newPassword']) < 8) {
+            return $this->json(['message' => 'Le nouveau mot de passe doit contenir au moins 8 caractères'], Response::HTTP_BAD_REQUEST);
+        }
+        
+        // Hasher et définir le nouveau mot de passe
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $data['newPassword']);
+        $user->setPassword($hashedPassword);
+
         // Mettre à jour les champs
         if (isset($data['prenom'])) {
             $user->setPrenom($data['prenom']);

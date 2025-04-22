@@ -1,14 +1,13 @@
 <?php
-
 namespace App\Enum;
 
 enum JourEnum: string
 {
-    case LUNDI = 'lundi';
-    case MARDI = 'mardi';
-    case MERCREDI = 'mercredi';
-    case JEUDI = 'jeudi';
-    case VENDREDI = 'vendredi';
-    case SAMEDI = 'samedi';
-    case DIMANCHE = 'dimanche';
+    case LUNDI = 'LUNDI';
+    case MARDI = 'MARDI';
+    case MERCREDI = 'MERCREDI';
+    case JEUDI = 'JEUDI';
+    case VENDREDI = 'VENDREDI';
+    case SAMEDI = 'SAMEDI';
+    case DIMANCHE = 'DIMANCHE';
 }

@@ -40,6 +40,34 @@ class Enseigne
     #[ORM\Column(type: 'string', length: 255)]
     private string $gpsLocation;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $website = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $notePrix = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $noteQualite = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $noteAmbiance = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $noteACM = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $nombreVotesPrix = 0;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $nombreVotesQualite = 0;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $nombreVotesAmbiance = 0;
+
+    #[ORM\Column(type: 'string', length: 70, nullable: true)]
+    private ?string $slogan = null;
+
+
     #[ORM\OneToMany(targetEntity: Horaire::class, mappedBy: 'enseigne', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $horaires;
 
@@ -60,6 +88,9 @@ class Enseigne
         $this->notations = new ArrayCollection();
         $this->categories = new ArrayCollection();
         $this->favoris = new ArrayCollection();
+        $this->nombreVotesPrix = 0;
+        $this->nombreVotesQualite = 0;
+        $this->nombreVotesAmbiance = 0;
     }
 
     public function getId(): ?int
@@ -76,6 +107,115 @@ class Enseigne
     {
         $this->nom = $nom;
         return $this;
+    }
+
+    public function getNotePrix(): ?float 
+    { 
+        return $this->notePrix; 
+    }
+    
+    public function setNotePrix(?float $notePrix): self 
+    { 
+        $this->notePrix = $notePrix; 
+        return $this; 
+    }
+
+    public function getNoteQualite(): ?float 
+    { 
+        return $this->noteQualite; 
+    }
+    
+    public function setNoteQualite(?float $noteQualite): self 
+    { 
+        $this->noteQualite = $noteQualite; 
+        return $this; 
+    }
+
+    public function getNoteAmbiance(): ?float 
+    { 
+        return $this->noteAmbiance; 
+    }
+    
+    public function setNoteAmbiance(?float $noteAmbiance): self 
+    { 
+        $this->noteAmbiance = $noteAmbiance; 
+        return $this; 
+    }
+
+    public function getNoteACM(): ?float 
+    { 
+        return $this->noteACM; 
+    }
+    
+    public function setNoteACM(?float $noteACM): self 
+    { 
+        $this->noteACM = $noteACM; 
+        return $this; 
+    }
+    public function getSlogan(): ?string
+    {
+        return $this->slogan;
+    }
+    
+    public function setSlogan(?string $slogan): self
+    {
+        $this->slogan = $slogan;
+        return $this;
+    }
+    public function getNombreVotesPrix(): ?int
+    {
+        return $this->nombreVotesPrix;
+    }
+
+    public function setNombreVotesPrix(?int $nombreVotesPrix): self
+    {
+        $this->nombreVotesPrix = $nombreVotesPrix;
+        return $this;
+    }
+
+    public function getNombreVotesQualite(): ?int
+    {
+        return $this->nombreVotesQualite;
+    }
+
+    public function setNombreVotesQualite(?int $nombreVotesQualite): self
+    {
+        $this->nombreVotesQualite = $nombreVotesQualite;
+        return $this;
+    }
+
+    public function getNombreVotesAmbiance(): ?int
+    {
+        return $this->nombreVotesAmbiance;
+    }
+
+    public function setNombreVotesAmbiance(?int $nombreVotesAmbiance): self
+    {
+        $this->nombreVotesAmbiance = $nombreVotesAmbiance;
+        return $this;
+    }
+
+    public function getNoteMoyenne(): ?float
+    {
+        $somme = 0;
+        $count = 0;
+        
+        if ($this->notePrix !== null) {
+            $somme += $this->notePrix;
+            $count++;
+        }
+        
+        if ($this->noteQualite !== null) {
+            $somme += $this->noteQualite;
+            $count++;
+        }
+        
+        if ($this->noteAmbiance !== null) {
+            $somme += $this->noteAmbiance;
+            $count++;
+        }
+        
+        return $count > 0 ? round($somme / $count, 1) : null;
     }
 
     public function getNumeroTelephone(): string
@@ -155,6 +295,17 @@ class Enseigne
         return $this;
     }
 
+    public function getWebsite(): ?string
+    {
+        return $this->website;
+    }
+
+    public function setWebsite(?string $website): self
+    {
+        $this->website = $website;
+        return $this;
+    }
+
     /**
      * @return Collection<int, Horaire>
      */
@@ -215,17 +366,16 @@ class Enseigne
         return $this;
     }
 
-  
-   /**
- * @return Collection<int, Categorie>
- */
-public function getCategories(): Collection
-{
-    if ($this->categories === null) {
-        $this->categories = new ArrayCollection();
+    /**
+     * @return Collection<int, Categorie>
+     */
+    public function getCategories(): Collection
+    {
+        if ($this->categories === null) {
+            $this->categories = new ArrayCollection();
+        }
+        return $this->categories;
     }
-    return $this->categories;
-}
 
     public function addCategory(Categorie $category): self
     {
@@ -240,13 +390,13 @@ public function getCategories(): Collection
     }
 
     public function removeCategory(Categorie $category): self
-{
-    if ($this->categories->contains($category)) {
-        $this->categories->removeElement($category);
-        $category->getEnseignes()->removeElement($this);
+    {
+        if ($this->categories->contains($category)) {
+            $this->categories->removeElement($category);
+            $category->getEnseignes()->removeElement($this);
+        }
+        return $this;
     }
-    return $this;
-}
 
     #[ORM\PreRemove]
     public function onPreRemove(PreRemoveEventArgs $args): void

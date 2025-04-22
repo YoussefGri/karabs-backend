@@ -27,13 +27,12 @@ class FavorisController extends AbstractController
         $data = [];
 
         foreach ($favoris as $enseigne) {
-            $noteMoyenne = $em->createQueryBuilder()
-                ->select('AVG(n.note)')
-                ->from('App\Entity\Notation', 'n')
-                ->where('n.enseigne = :enseigne')
-                ->setParameter('enseigne', $enseigne)
-                ->getQuery()
-                ->getSingleScalarResult();
+            $noteMoyenne = (
+                $enseigne->getNotePrix() +
+                $enseigne->getNoteQualite() +
+                $enseigne->getNoteAmbiance()
+            ) / 3;
+
 
             $data[] = [
                 'id' => $enseigne->getId(),
@@ -42,7 +41,8 @@ class FavorisController extends AbstractController
                 'photo' => $enseigne->getPhoto(),
                 'numeroTelephone' => $enseigne->getNumeroTelephone(),
                 'description' => $enseigne->getDescription(),
-                'noteMoyenne' => round((float) $noteMoyenne, 1),
+                'noteMoyenne' => round($noteMoyenne, 1),
+                'slogan' => $enseigne->getSlogan(),
             ];
         }
 

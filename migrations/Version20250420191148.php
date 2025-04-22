@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250411193217 extends AbstractMigration
+final class Version20250420191148 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,7 @@ final class Version20250411193217 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE categorie (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE enseigne (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, numero_telephone VARCHAR(255) NOT NULL, adresse VARCHAR(255) NOT NULL, photo VARCHAR(255) DEFAULT NULL, description LONGTEXT NOT NULL, note_seuil DOUBLE PRECISION NOT NULL, points_cle JSON DEFAULT NULL, gps_location VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE enseigne (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, numero_telephone VARCHAR(255) NOT NULL, adresse VARCHAR(255) NOT NULL, photo VARCHAR(255) DEFAULT NULL, description LONGTEXT NOT NULL, note_seuil DOUBLE PRECISION NOT NULL, points_cle JSON DEFAULT NULL, gps_location VARCHAR(255) NOT NULL, website VARCHAR(255) DEFAULT NULL, note_prix DOUBLE PRECISION DEFAULT NULL, note_qualite DOUBLE PRECISION DEFAULT NULL, note_ambiance DOUBLE PRECISION DEFAULT NULL, note_acm DOUBLE PRECISION DEFAULT NULL, nombre_votes_prix INT DEFAULT NULL, nombre_votes_qualite INT DEFAULT NULL, nombre_votes_ambiance INT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE enseigne_categorie (enseigne_id INT NOT NULL, categorie_id INT NOT NULL, INDEX IDX_877C03BD6C2A0A71 (enseigne_id), INDEX IDX_877C03BDBCF5E72D (categorie_id), PRIMARY KEY(enseigne_id, categorie_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE enseigne_user_favoris (enseigne_id INT NOT NULL, user_id INT NOT NULL, INDEX IDX_B492FB356C2A0A71 (enseigne_id), INDEX IDX_B492FB35A76ED395 (user_id), PRIMARY KEY(enseigne_id, user_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE horaire (id INT AUTO_INCREMENT NOT NULL, enseigne_id INT NOT NULL, jour VARCHAR(255) NOT NULL, heure_ouverture TIME NOT NULL, heure_fermeture TIME NOT NULL, INDEX IDX_BBC83DB66C2A0A71 (enseigne_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
