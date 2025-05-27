@@ -1,0 +1,59 @@
+<?php //easyadmin.routes.fqcn_to_route
+
+return [PHP_INT_MAX, [
+    'App\\Controller\\Admin\\DashboardController' => [
+        '' => [
+            '' => 'admin',
+        ],
+        'App\\Controller\\Admin\\CategorieCrudController' => [
+            'index' => 'admin_categorie_index',
+            'new' => 'admin_categorie_new',
+            'batchDelete' => 'admin_categorie_batch_delete',
+            'autocomplete' => 'admin_categorie_autocomplete',
+            'renderFilters' => 'admin_categorie_render_filters',
+            'edit' => 'admin_categorie_edit',
+            'delete' => 'admin_categorie_delete',
+            'detail' => 'admin_categorie_detail',
+        ],
+        'App\\Controller\\Admin\\EnseigneCrudController' => [
+            'index' => 'admin_enseigne_index',
+            'new' => 'admin_enseigne_new',
+            'batchDelete' => 'admin_enseigne_batch_delete',
+            'autocomplete' => 'admin_enseigne_autocomplete',
+            'renderFilters' => 'admin_enseigne_render_filters',
+            'edit' => 'admin_enseigne_edit',
+            'delete' => 'admin_enseigne_delete',
+            'detail' => 'admin_enseigne_detail',
+        ],
+        'App\\Controller\\Admin\\HoraireCrudController' => [
+            'index' => 'admin_horaire_index',
+            'new' => 'admin_horaire_new',
+            'batchDelete' => 'admin_horaire_batch_delete',
+            'autocomplete' => 'admin_horaire_autocomplete',
+            'renderFilters' => 'admin_horaire_render_filters',
+            'edit' => 'admin_horaire_edit',
+            'delete' => 'admin_horaire_delete',
+            'detail' => 'admin_horaire_detail',
+        ],
+        'App\\Controller\\Admin\\NotationCrudController' => [
+            'index' => 'admin_notation_index',
+            'new' => 'admin_notation_new',
+            'batchDelete' => 'admin_notation_batch_delete',
+            'autocomplete' => 'admin_notation_autocomplete',
+            'renderFilters' => 'admin_notation_render_filters',
+            'edit' => 'admin_notation_edit',
+            'delete' => 'admin_notation_delete',
+            'detail' => 'admin_notation_detail',
+        ],
+        'App\\Controller\\Admin\\UserCrudController' => [
+            'index' => 'admin_user_index',
+            'new' => 'admin_user_new',
+            'batchDelete' => 'admin_user_batch_delete',
+            'autocomplete' => 'admin_user_autocomplete',
+            'renderFilters' => 'admin_user_render_filters',
+            'edit' => 'admin_user_edit',
+            'delete' => 'admin_user_delete',
+            'detail' => 'admin_user_detail',
+        ],
+    ],
+]];
