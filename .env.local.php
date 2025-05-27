@@ -5,7 +5,7 @@
 return array (
   'APP_ENV' => 'prod',
   'APP_SECRET' => '5a60fbf20b1a276ca2a0a2a50b6fae57',
-  'DATABASE_URL' => 'mysql://yuno:yuno@127.0.0.1:3306/karabs_3?serverVersion=8.0&charset=utf8mb4',
+  'DATABASE_URL' => 'mysql://root:rootroot@127.0.0.1:3306/karabs_6?serverVersion=8.0&charset=utf8mb4',
   'MESSENGER_TRANSPORT_DSN' => 'doctrine://default?auto_setup=0',
   'MAILER_DSN' => 'smtp://yasserrazzaki0@gmail.com:jrilkzmwmvutyqju@smtp.gmail.com:587?encryption=tls',
   'MAILER_FROM_ADDRESS' => 'yasserrazzaki0@gmail.com',
