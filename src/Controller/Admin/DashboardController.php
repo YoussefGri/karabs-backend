@@ -55,6 +55,6 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Navigation');
         
         // Lien vers le site principal
-        yield MenuItem::linkToUrl('Retour au site', 'fas fa-arrow-left', '/');
+        yield MenuItem::linkToUrl('Retour au Karabs', 'fas fa-arrow-left', '/login');
     }
 }

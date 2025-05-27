@@ -4,6 +4,9 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
+#[ORM\Table(name: "notation")]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\UniqueConstraint(name: 'unique_user_enseigne', columns: ['user_id', 'enseigne_id'])]
 class Notation
 {
     #[ORM\Id]
@@ -11,8 +14,14 @@ class Notation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'float')]
-    private float $note;
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $notePrix = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $noteQualite = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $noteAmbiance = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $commentaire = null;
@@ -20,9 +29,9 @@ class Notation
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $dateCreation;
 
-    #[ORM\ManyToOne(targetEntity: user::class, inversedBy: 'notations',)]
-    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", onDelete: "CASCADE")]
-    private ?user $user = null;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'notations')]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", onDelete: "CASCADE", nullable: false)]
+    private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Enseigne::class, inversedBy: 'notations')]
     #[ORM\JoinColumn(nullable: false)]
@@ -30,22 +39,53 @@ class Notation
 
     public function __construct()
     {
-        $this->dateCreation = new \DateTime();
+        $this->dateCreation = new \Datetime();
     }
+
+    #[ORM\PrePersist]
+    public function prePersist(): void
+    {
+        if (!$this->dateCreation) {
+            $this->dateCreation = new \Datetime();
+        }
+    }
+    
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getNote(): float
+    public function getNotePrix(): ?float
     {
-        return $this->note;
+        return $this->notePrix;
     }
 
-    public function setNote(float $note): self
+    public function setNotePrix(?float $notePrix): self
     {
-        $this->note = $note;
+        $this->notePrix = $notePrix;
+        return $this;
+    }
+
+    public function getNoteQualite(): ?float
+    {
+        return $this->noteQualite;
+    }
+
+    public function setNoteQualite(?float $noteQualite): self
+    {
+        $this->noteQualite = $noteQualite;
+        return $this;
+    }
+
+    public function getNoteAmbiance(): ?float
+    {
+        return $this->noteAmbiance;
+    }
+
+    public function setNoteAmbiance(?float $noteAmbiance): self
+    {
+        $this->noteAmbiance = $noteAmbiance;
         return $this;
     }
 
@@ -59,24 +99,41 @@ class Notation
         $this->commentaire = $commentaire;
         return $this;
     }
+    public function onPrePersist(): void
+    {
+        $this->dateCreation = new \DateTimeImmutable();
+    }
 
-    public function getDateCreation(): \DateTimeInterface
+    public function setDateCreation(\DateTimeInterface $date): self
+    {
+        $this->dateCreation = $date instanceof \DateTimeImmutable
+            ? $date
+            : \DateTimeImmutable::createFromMutable($date);
+        return $this;
+    }
+
+
+    public function getDateCreation(): ?\DateTime
     {
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTimeInterface $dateCreation): self
+    /**
+     * @ORM\PrePersist
+     */
+    public function initializeDateCreation(): void
     {
-        $this->dateCreation = $dateCreation;
-        return $this;
-    }
 
-    public function getuser(): ?user
+      $this->dateCreation = new \DateTime();
+    }
+    
+
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setuser(?user $user): self
+    public function setUser(?User $user): self
     {
         $this->user = $user;
         return $this;

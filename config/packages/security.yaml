@@ -48,12 +48,13 @@ security:
                 path: app_logout
 
     access_control:
-        - { path: ^/admin/login, roles: PUBLIC_ACCESS }
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
-        - { path: ^/api/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/public, roles: PUBLIC_ACCESS }
-        - { path: ^/connect, roles: PUBLIC_ACCESS }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/, roles: PUBLIC_ACCESS }
+    - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+    - { path: ^/admin, roles: ROLE_ADMIN }
+    - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
+    - { path: ^/api/register, roles: PUBLIC_ACCESS }
+    - { path: ^/api/reset-password, roles: PUBLIC_ACCESS }  # 🔼 DOIT être au-dessus
+    - { path: ^/api/public, roles: PUBLIC_ACCESS }
+    - { path: ^/connect, roles: PUBLIC_ACCESS }
+    - { path: ^/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }          # 🔽 DOIT venir après
+    - { path: ^/, roles: PUBLIC_ACCESS }

@@ -3,652 +3,355 @@
 namespace App\Controller;
 
 use App\Entity\Enseigne;
+use App\Entity\Notation;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-
+use Symfony\Component\Routing\Annotation\Route;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 final class EnseigneController extends AbstractController
 {
-
-    #[Route('/api/enseignes/by-category/{name}', name: 'enseignes_by_category', methods: ['GET'])]
-public function getEnseignesByCategory(string $name, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-
-
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    $repository = $em->getRepository(Enseigne::class);
-
-    if (strtolower($name) === 'toutes') {
-        $enseignes = $repository->findAll();
-    } else {
-        $enseignes = $repository->createQueryBuilder('e')
-            ->join('e.categories', 'c')
-            ->where('c.nom = :name')
-            ->setParameter('name', $name)
-            ->getQuery()
-            ->getResult();
-    }
-
-    $data = array_map(function (Enseigne $e) use ($em) {
-        $noteMoyenne = (
-            $e->getNotePrix() +
-            $e->getNoteQualite() +
-            $e->getNoteAmbiance()
-        ) / 3;
-        
-
-        return [
-            'id' => $e->getId(),
-            'nom' => $e->getNom(),
-            'description' => $e->getDescription(),
-            'adresse' => $e->getAdresse(),
-            'numeroTelephone' => $e->getNumeroTelephone(),
-            'photo' => $e->getPhoto(),
-            'noteMoyenne' => round($noteMoyenne, 1),
-            'points_cle' => $e->getPointsCle(),
-            'notePrix' => $e->getNotePrix(),
-            'noteQualite' => $e->getNoteQualite(),
-            'noteAmbiance' => $e->getNoteAmbiance(),
-            'noteACM' => $e->getNoteACM(),
-            'slogan' => $e->getSlogan(),
-            'categorie' => $e->getCategories()->first() ? $e->getCategories()->first()->getNom() : 'Non classé'
-
-        ];
-    }, $enseignes);
-
-    return $this->json([
-        'enseignes' => $data,
-        'favoris' => $user->getFavorisIds()
-    ]);
-}
-
-
-#[Route('/api/map', name: 'map_enseignes', methods: ['GET'])]
-public function getEnseignesForMap(EntityManagerInterface $em): JsonResponse
-{
-    $enseignes = $em->getRepository(Enseigne::class)->findAll();
-
-    $data = array_map(function (Enseigne $e) use ($em) {
-        $noteMoyenne = $em->createQueryBuilder()
-            ->select('AVG(n.note)')
-            ->from('App\Entity\Notation', 'n')
-            ->where('n.enseigne = :enseigne')
-            ->setParameter('enseigne', $e)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        // Extraire latitude / longitude depuis gps_location
-        [$lat, $lng] = explode(',', $e->getGpsLocation());
-
-        return [
-            'id' => $e->getId(),
-            'nom' => $e->getNom(),
-            'noteMoyenne' => round((float) $noteMoyenne, 1),
-            'lat' => (float) $lat,
-            'lng' => (float) $lng,
-            'photo' => $e->getPhoto(),
-            'numeroTelephone' => $e->getNumeroTelephone(),
-            'adresse' => $e->getAdresse(),
-            'categories'=> $e->getCategories()->map(function ($c) {
-                return [
-                    'id' => $c->getId(),
-                    'nom' => $c->getNom()
-                ];
-            })->toArray(),
-        ];
-    }, $enseignes);
-
-    return $this->json($data);
-}
-
-
-#[Route('/api/enseignes/random/{count}', name: 'random_enseignes', methods: ['GET'])]
-public function getRandomEnseignes(int $count, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    $enseignes = $em->getRepository(Enseigne::class)->findAll();
-    shuffle($enseignes);
-    $randomEnseignes = array_slice($enseignes, 0, $count);
-
-    $data = array_map(function (Enseigne $e) use ($em) {
-        $noteMoyenne = (
-            $e->getNotePrix() +
-            $e->getNoteQualite() +
-            $e->getNoteAmbiance()
-        ) / 3;
-        
-
-        return [
-            'id' => $e->getId(),
-            'nom' => $e->getNom(),
-            //'description' => $e->getDescription(),
-            'adresse' => $e->getAdresse(),
-            'photo' => $e->getPhoto(),
-            'noteACM' => $e->getNoteACM(),
-            'slogan' => $e->getSlogan(),
-            'noteMoyenne' => round($noteMoyenne, 1),
-            'categorie' => $e->getCategories()->first() ? $e->getCategories()->first()->getNom() : 'Non classé'
-        ];
-    }, $randomEnseignes);
-
-    return $this->json([
-        'enseignes' => $data
-    ]);
-}
-
-#[Route('/api/enseignes/{id}/horaires', name: 'enseignes_horaires', methods: ['GET'])]
-public function getHoraires(int $id, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    $enseigne = $em->getRepository(Enseigne::class)->find($id);
-    if (!$enseigne) {
-        return $this->json(['message' => 'Enseigne non trouvée'], 404);
-    }
-    
-    $horaires = [];
-    $rawHoraires = [];
-    
-    try {
+    private function calculateAverage(Enseigne $enseigne, EntityManagerInterface $em): array
+    {
         $conn = $em->getConnection();
-        $sql = "SELECT id, jour, TIME_FORMAT(heure_ouverture, '%H:%i') as ouverture, 
-                TIME_FORMAT(heure_fermeture, '%H:%i') as fermeture 
-                FROM horaire WHERE enseigne_id = :enseigne_id 
-                ORDER BY FIELD(jour, 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'),
-                heure_ouverture ASC";
-        
+        $sql = <<<SQL
+            SELECT
+                AVG(note_prix) AS avgPrix,
+                AVG(note_qualite) AS avgQualite,
+                AVG(note_ambiance) AS avgAmbiance
+            FROM notation
+            WHERE enseigne_id = :id
+        SQL;
+
         $stmt = $conn->prepare($sql);
-        $result = $stmt->executeQuery(['enseigne_id' => $id]);
-        $rawHoraires = $result->fetchAllAssociative();
-        
-        foreach ($rawHoraires as $h) {
-            $jour = strtoupper($h['jour']);
-            $horaires[] = [
-                'jour' => $jour,
-                'heures' => [
-                    'ouverture' => $h['ouverture'],
-                    'fermeture' => $h['fermeture']
-                ]
-            ];
-        }
-        
-        return $this->json(['horaires' => $horaires]);
-        
-    } catch (\Throwable $e) {
-        error_log('Exception dans getHoraires: ' . $e->getMessage());
-        
-        return $this->json([
-            'horaires' => [
-                ['jour' => 'LUNDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
-                ['jour' => 'MARDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
-                ['jour' => 'MERCREDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
-                ['jour' => 'JEUDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
-                ['jour' => 'VENDREDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
-                ['jour' => 'SAMEDI', 'heures' => ['ouverture' => '10:00', 'fermeture' => '17:00']],
-                ['jour' => 'DIMANCHE', 'heures' => ['ouverture' => '10:00', 'fermeture' => '15:00']]
-            ],
-            'error' => $e->getMessage()
-        ], 200);
-    }
-}
-#[Route('/api/enseignes/{id}', name: 'enseignes_by_id', methods: ['GET'])]
-public function getEnseigneById(int $id, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
+        $stmt->bindValue('id', $enseigne->getId());
+        $result = $stmt->executeQuery()->fetchAssociative();
 
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
+        $avgPrix = $result['avgPrix'] ?? 0;
+        $avgQualite = $result['avgQualite'] ?? 0;
+        $avgAmbiance = $result['avgAmbiance'] ?? 0;
+
+        $notes = array_filter([$avgPrix, $avgQualite, $avgAmbiance], fn($n) => $n !== null);
+        $moyenne = !empty($notes) ? round(array_sum($notes) / count($notes), 1) : 0.0;
+
+        return [
+            'prix' => round((float)$avgPrix, 1),
+            'qualite' => round((float)$avgQualite, 1),
+            'ambiance' => round((float)$avgAmbiance, 1),
+            'moyenne' => $moyenne
+        ];
     }
 
-    $enseigne = $em->getRepository(Enseigne::class)->find($id);
-
-    if (!$enseigne) {
-        return $this->json(['message' => 'Enseigne non trouvée'], 404);
-    }
-
-    $noteMoyenne = (
-        $enseigne->getNotePrix() +
-        $enseigne->getNoteQualite() +
-        $enseigne->getNoteAmbiance()
-    ) / 3;
-
-    return $this->json([
-        'id' => $enseigne->getId(),
-        'nom' => $enseigne->getNom(),
-        'description' => $enseigne->getDescription(),
-        'adresse' => $enseigne->getAdresse(),
-        'gpsLocation' => $enseigne->getGpsLocation() . ',' . $enseigne->getGpsLocation(),
-        'numeroTelephone' => $enseigne->getNumeroTelephone(),
-        'photo' => $enseigne->getPhoto(),
-        'noteMoyenne' => round($noteMoyenne, 1),
-        'notePrix' => $enseigne->getNotePrix(),
-        'noteQualite' => $enseigne->getNoteQualite(),
-        'noteAmbiance' => $enseigne->getNoteAmbiance(),
-        'slogan' => $enseigne->getSlogan(),
-        'points_cle' => $enseigne->getPointsCle(),
-        'noteACM' => $enseigne->getNoteACM(),
-        'categorie' => $enseigne->getCategories()->first()?->getNom() ?? 'Non classé'
-    ]);
-}
-
-
-
- #[Route('/api/enseignes/{id}/rate', name: 'rate_enseigne', methods: ['POST'])]
-public function rateEnseigne(int $id, Request $request, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    try {
-        $data = json_decode($request->getContent(), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Invalid JSON data');
-        }
-
-        $category = $data['category'] ?? null;
-        $rating = $data['rating'] ?? null;
-
-        if (!$category || !$rating || !in_array($category, ['prix', 'qualite', 'ambiance']) || $rating < 1 || $rating > 5) {
-            return $this->json(['message' => 'Données de notation invalides'], 400);
-        }
-
+    #[Route('/api/enseignes/{id}/note-acm', name: 'enseignes_note_acm', methods: ['GET'])]
+    public function getNoteAcm(int $id, EntityManagerInterface $em): JsonResponse
+    {
         $enseigne = $em->getRepository(Enseigne::class)->find($id);
+
         if (!$enseigne) {
-            return $this->json(['message' => 'Enseigne non trouvée'], 404);
+            throw new NotFoundHttpException('Enseigne non trouvée');
         }
-
-        switch ($category) {
-            case 'prix':
-                $nbVotes = $enseigne->getNombreVotesPrix() ?? 0;
-                $totalPoints = ($enseigne->getNotePrix() ?? 0) * $nbVotes;
-                $nbVotes++;
-                $nouvelleNote = ($totalPoints + $rating) / $nbVotes;
-                $enseigne->setNotePrix($nouvelleNote);
-                $enseigne->setNombreVotesPrix($nbVotes);
-                break;
-            case 'qualite':
-                $nbVotes = $enseigne->getNombreVotesQualite() ?? 0;
-                $totalPoints = ($enseigne->getNoteQualite() ?? 0) * $nbVotes;
-                $nbVotes++;
-                $nouvelleNote = ($totalPoints + $rating) / $nbVotes;
-                $enseigne->setNoteQualite($nouvelleNote);
-                $enseigne->setNombreVotesQualite($nbVotes);
-                break;
-            case 'ambiance':
-                $nbVotes = $enseigne->getNombreVotesAmbiance() ?? 0;
-                $totalPoints = ($enseigne->getNoteAmbiance() ?? 0) * $nbVotes;
-                $nbVotes++;
-                $nouvelleNote = ($totalPoints + $rating) / $nbVotes;
-                $enseigne->setNoteAmbiance($nouvelleNote);
-                $enseigne->setNombreVotesAmbiance($nbVotes);
-                break;
-        }
-
-        $em->flush();
-
-        $notePrix = $enseigne->getNotePrix();
-        $noteQualite = $enseigne->getNoteQualite();
-        $noteAmbiance = $enseigne->getNoteAmbiance();
-
-        $totalNotes = 0;
-        $nombreNotes = 0;
-
-        if ($notePrix !== null) {
-            $totalNotes += $notePrix;
-            $nombreNotes++;
-        }
-
-        if ($noteQualite !== null) {
-            $totalNotes += $noteQualite;
-            $nombreNotes++;
-        }
-
-        if ($noteAmbiance !== null) {
-            $totalNotes += $noteAmbiance;
-            $nombreNotes++;
-        }
-
-        $noteMoyenne = ($nombreNotes > 0) ? ($totalNotes / $nombreNotes) : null;
 
         return $this->json([
-            'message' => 'Avis enregistré',
-            'notePrix' => $enseigne->getNotePrix(),
-            'noteQualite' => $enseigne->getNoteQualite(),
-            'noteAmbiance' => $enseigne->getNoteAmbiance(),
-            'noteMoyenne' => round($noteMoyenne, 1)
+            'noteACM' => [
+                'prix' => $enseigne->getNotePrix(),
+                'qualite' => $enseigne->getNoteQualite(),
+                'ambiance' => $enseigne->getNoteAmbiance(),
+            ]
         ]);
-
-    } catch (\Exception $e) {
-        return $this->json(['message' => 'Erreur lors de la notation: ' . $e->getMessage()], 500);
     }
-}
+
+    #[Route('/api/enseignes/{id}/note-moyenne', name: 'enseignes_note_moyenne', methods: ['GET'])]
+    public function getNoteMoyenneFromNotation(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $enseigne = $em->getRepository(Enseigne::class)->find($id);
+
+        if (!$enseigne) {
+            throw new NotFoundHttpException('Enseigne non trouvée');
+        }
+
+        $notes = $this->calculateAverage($enseigne, $em);
+
+        return $this->json([
+            'notes-moyennes' => $notes,
+            'moyenne' => $notes['moyenne']
+        ]);
+    }
 
 
-}
 
+    #[Route('/api/map', name: 'map_enseignes', methods: ['GET'])]
+    public function getEnseignesForMap(EntityManagerInterface $em): JsonResponse
+    {
+        $enseignes = $em->getRepository(Enseigne::class)->findAll();
 
-/*
-final class EnseigneController extends AbstractController
-{
+        $data = array_map(function (Enseigne $enseigne) use ($em) {
+            $noteMoyenne = $this->calculateAverage($enseigne, $em)['moyenne'];
+            [$lat, $lng] = [$enseigne->getLatitude(), $enseigne->getLongitude()];
+
+            return [
+                'id' => $enseigne->getId(),
+                'nom' => $enseigne->getNom(),
+                'noteMoyenne' => $noteMoyenne,
+                'lat' => (float) $lat,
+                'lng' => (float) $lng,
+                'photo' => $enseigne->getPhoto()?: -1,
+                'numeroTelephone' => $enseigne->getNumeroTelephone(),
+                'adresse' => $enseigne->getAdresse(),
+                'categories' => $enseigne->getCategories()->map(function ($categorie) {
+                    return [
+                        // 'id' => $categorie->getId(),
+                        'nom' => $categorie->getNom(),
+                        // 'image' => $categorie->getImage(),
+                        'couleur' => $categorie->getCouleur()
+                    ];
+                })->toArray(),
+            ];
+        }, $enseignes);
+
+        return $this->json($data);
+    }
 
     #[Route('/api/enseignes/by-category/{name}', name: 'enseignes_by_category', methods: ['GET'])]
-public function getEnseignesByCategory(string $name, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
+    public function getEnseignesByCategory(string $name, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            throw new AccessDeniedException('Non authentifié');
+        }
 
+        $repo = $em->getRepository(Enseigne::class);
+        $enseignes = strtolower($name) === 'toutes'
+            ? $repo->findAll()
+            : $repo->createQueryBuilder('e')
+                ->join('e.categories', 'c')
+                ->where('c.nom = :name')
+                ->setParameter('name', $name)
+                ->getQuery()
+                ->getResult();
 
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
+        $data = array_map(function (Enseigne $enseigne) use ($em) {
+            $notes = $this->calculateAverage($enseigne, $em);
 
-    $repository = $em->getRepository(Enseigne::class);
-
-    if (strtolower($name) === 'toutes') {
-        $enseignes = $repository->findAll();
-    } else {
-        $enseignes = $repository->createQueryBuilder('e')
-            ->join('e.categories', 'c')
-            ->where('c.nom = :name')
-            ->setParameter('name', $name)
-            ->getQuery()
-            ->getResult();
-    }
-
-    $data = array_map(function (Enseigne $e) use ($em) {
-        $noteMoyenne = $em->createQueryBuilder()
-            ->select('AVG(n.note)')
-            ->from('App\Entity\Notation', 'n')
-            ->where('n.enseigne = :enseigne')
-            ->setParameter('enseigne', $e)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return [
-            'id' => $e->getId(),
-            'nom' => $e->getNom(),
-            'description' => $e->getDescription(),
-            'adresse' => $e->getAdresse(),
-            'numeroTelephone' => $e->getNumeroTelephone(),
-            'photo' => $e->getPhoto(),
-            'noteMoyenne' => round((float) $noteMoyenne, 1)
-        ];
-    }, $enseignes);
-
-    // return $this->json(['message' => 'Non autorisé'], 401);
-
-    return $this->json([
-        'enseignes' => $data,
-        'favoris' => $user->getFavorisIds()
-    ]);
-}
-
-#[Route('/api/map', name: 'map_enseignes', methods: ['GET'])]
-public function getEnseignesForMap(EntityManagerInterface $em): JsonResponse
-{
-    $enseignes = $em->getRepository(Enseigne::class)->findAll();
-
-    $data = array_map(function (Enseigne $e) use ($em) {
-        $noteMoyenne = $em->createQueryBuilder()
-            ->select('AVG(n.note)')
-            ->from('App\Entity\Notation', 'n')
-            ->where('n.enseigne = :enseigne')
-            ->setParameter('enseigne', $e)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        // Extraire latitude / longitude depuis gps_location
-        [$lat, $lng] = explode(',', $e->getGpsLocation());
-
-        return [
-            'id' => $e->getId(),
-            'nom' => $e->getNom(),
-            'noteMoyenne' => round((float) $noteMoyenne, 1),
-            'lat' => (float) $lat,
-            'lng' => (float) $lng,
-            'photo' => $e->getPhoto(),
-            'numeroTelephone' => $e->getNumeroTelephone(),
-            'adresse' => $e->getAdresse(),
-            'categories'=> $e->getCategories()->map(function ($c) {
-                return [
-                    'id' => $c->getId(),
-                    'nom' => $c->getNom()
-                ];
-            })->toArray(),
-        ];
-    }, $enseignes);
-
-    return $this->json($data);
-}
-
-#[Route('/api/enseignes/random/{count}', name: 'random_enseignes', methods: ['GET'])]
-public function getRandomEnseignes(int $count, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    $enseignes = $em->getRepository(Enseigne::class)->findAll();
-    shuffle($enseignes);
-    $randomEnseignes = array_slice($enseignes, 0, $count);
-
-    $data = array_map(function (Enseigne $e) use ($em) {
-        $noteMoyenne = (
-            $e->getNotePrix() +
-            $e->getNoteQualite() +
-            $e->getNoteAmbiance()
-        ) / 3;
-        
-
-        return [
-            'id' => $e->getId(),
-            'nom' => $e->getNom(),
-            'description' => $e->getDescription(),
-            'adresse' => $e->getAdresse(),
-            'photo' => $e->getPhoto(),
-            'noteACM' => $e->getNoteACM(),
-            'noteMoyenne' => round($noteMoyenne, 1),
-            'categorie' => $e->getCategories()->first() ? $e->getCategories()->first()->getNom() : 'Non classé'
-        ];
-    }, $randomEnseignes);
-
-    return $this->json([
-        'enseignes' => $data
-    ]);
-}
-
-#[Route('/api/enseignes/{id}/horaires', name: 'enseignes_horaires', methods: ['GET'])]
-public function getHoraires(int $id, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    $enseigne = $em->getRepository(Enseigne::class)->find($id);
-
-    if (!$enseigne) {
-        return $this->json(['message' => 'Enseigne non trouvée'], 404);
-    }
-
-    try {
-        $horaires = [];
-        foreach ($enseigne->getHoraires() as $horaire) {
-            // Récupérer la valeur du jour comme une chaîne, sans dépendre de l'enum
-            $jourStr = is_object($horaire->getJour()) ? (string)$horaire->getJour()->value : (string)$horaire->getJour();
-            
-            $horaires[] = [
-                'jour' => $jourStr,
-                'heures' => [
-                    'ouverture' => $horaire->getHeureOuverture()->format('H:i'),
-                    'fermeture' => $horaire->getHeureFermeture()->format('H:i')
-                ]
+            return [
+                'id' => $enseigne->getId(),
+                'nom' => $enseigne->getNom(),
+                'adresse' => $enseigne->getAdresse(),
+                'numeroTelephone' => $enseigne->getNumeroTelephone(),
+                'photo' => $enseigne->getPhoto(),
+                'noteMoyenne' => $notes['moyenne'],
+                'slogan' => $enseigne->getSlogan(),
+                // 'categorie' => $enseigne->getCategories()->first()?->getNom() ?? 'Non classé'
+                'categorie' => ($cat = $enseigne->getCategories()->first())
+                ? ['nom' => $cat->getNom(), 'couleur' => $cat->getCouleur()]
+                : ['nom' => 'Non classé', 'couleur' => '#FF0000']
             ];
+        }, $enseignes);
+
+        return $this->json([
+            'enseignes' => $data,
+            'favoris' => $user->getFavorisIds()
+        ]);
+    }
+
+    #[Route('/api/enseignes/random/{count}', name: 'random_enseignes', methods: ['GET'])]
+    public function getRandomEnseignes(int $count, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            throw new AccessDeniedException('Non authentifié');
         }
 
-        return $this->json(['data' => $horaires]);
-    } catch (\Exception $e) {
-        // Log l'erreur pour le débogage
-        error_log('Erreur dans getHoraires: ' . $e->getMessage());
-        return $this->json(['message' => 'Erreur lors de la récupération des horaires', 'error' => $e->getMessage()], 500);
-    }
-}
+        $enseignes = $em->getRepository(Enseigne::class)->findAll();
+        shuffle($enseignes);
+        $randomEnseignes = array_slice($enseignes, 0, min($count, count($enseignes)));
 
+        $data = array_map(function (Enseigne $enseigne) use ($em) {
+            $notes = $this->calculateAverage($enseigne, $em);
 
+            return [
+                'id' => $enseigne->getId(),
+                'nom' => $enseigne->getNom(),
+                'adresse' => $enseigne->getAdresse(),
+                'photo' => $enseigne->getPhoto(),
+                'slogan' => $enseigne->getSlogan(),
+                'noteMoyenne' => $notes['moyenne'],
+                'categorie' => $enseigne->getCategories()->first()?->getNom() ?? 'Non classé'
+            ];
+        }, $randomEnseignes);
 
-
-#[Route('/api/enseignes/{id}', name: 'enseignes_by_id', methods: ['GET'])]
-public function getEnseigneById(int $id, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    $enseigne = $em->getRepository(Enseigne::class)->find($id);
-
-    if (!$enseigne) {
-        return $this->json(['message' => 'Enseigne non trouvée'], 404);
+        return $this->json(['enseignes' => $data]);
     }
 
-    $noteMoyenne = (
-        $enseigne->getNotePrix() +
-        $enseigne->getNoteQualite() +
-        $enseigne->getNoteAmbiance()
-    ) / 3;
-
-    return $this->json([
-        'id' => $enseigne->getId(),
-        'nom' => $enseigne->getNom(),
-        'description' => $enseigne->getDescription(),
-        'adresse' => $enseigne->getAdresse(),
-        'gpsLocation' => $enseigne->getGpsLocation() . ',' . $enseigne->getGpsLocation(),
-        'numeroTelephone' => $enseigne->getNumeroTelephone(),
-        'photo' => $enseigne->getPhoto(),
-        'noteMoyenne' => round($noteMoyenne, 1),
-        'notePrix' => $enseigne->getNotePrix(),
-        'noteQualite' => $enseigne->getNoteQualite(),
-        'noteAmbiance' => $enseigne->getNoteAmbiance(),
-        'noteACM' => $enseigne->getNoteACM(),
-        'categorie' => $enseigne->getCategories()->first()?->getNom() ?? 'Non classé'
-    ]);
-}
-
-
-
- #[Route('/api/enseignes/{id}/rate', name: 'rate_enseigne', methods: ['POST'])]
-public function rateEnseigne(int $id, Request $request, EntityManagerInterface $em): JsonResponse
-{
-    $user = $this->getUser();
-    if (!$user) {
-        return $this->json(['message' => 'Non authentifié'], 401);
-    }
-
-    try {
-        $data = json_decode($request->getContent(), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Invalid JSON data');
-        }
-
-        $category = $data['category'] ?? null;
-        $rating = $data['rating'] ?? null;
-
-        if (!$category || !$rating || !in_array($category, ['prix', 'qualite', 'ambiance']) || $rating < 1 || $rating > 5) {
-            return $this->json(['message' => 'Données de notation invalides'], 400);
+    #[Route('/api/enseignes/{id}/horaires', name: 'enseignes_horaires', methods: ['GET'])]
+    public function getHoraires(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            throw new AccessDeniedException('Non authentifié');
         }
 
         $enseigne = $em->getRepository(Enseigne::class)->find($id);
         if (!$enseigne) {
-            return $this->json(['message' => 'Enseigne non trouvée'], 404);
+            throw new NotFoundHttpException('Enseigne non trouvée');
         }
 
-        // Mise à jour des notes avec un système de pondération
-        switch ($category) {
-            case 'prix':
-                $nbVotes = $enseigne->getNombreVotesPrix() ?? 0;
-                $totalPoints = ($enseigne->getNotePrix() ?? 0) * $nbVotes;
-                $nbVotes++;
-                $nouvelleNote = ($totalPoints + $rating) / $nbVotes;
-                $enseigne->setNotePrix($nouvelleNote);
-                $enseigne->setNombreVotesPrix($nbVotes);
-                break;
-            case 'qualite':
-                $nbVotes = $enseigne->getNombreVotesQualite() ?? 0;
-                $totalPoints = ($enseigne->getNoteQualite() ?? 0) * $nbVotes;
-                $nbVotes++;
-                $nouvelleNote = ($totalPoints + $rating) / $nbVotes;
-                $enseigne->setNoteQualite($nouvelleNote);
-                $enseigne->setNombreVotesQualite($nbVotes);
-                break;
-            case 'ambiance':
-                $nbVotes = $enseigne->getNombreVotesAmbiance() ?? 0;
-                $totalPoints = ($enseigne->getNoteAmbiance() ?? 0) * $nbVotes;
-                $nbVotes++;
-                $nouvelleNote = ($totalPoints + $rating) / $nbVotes;
-                $enseigne->setNoteAmbiance($nouvelleNote);
-                $enseigne->setNombreVotesAmbiance($nbVotes);
-                break;
+        try {
+            $conn = $em->getConnection();
+            $sql = "SELECT id, jour, TIME_FORMAT(heure_ouverture, '%H:%i') as ouverture, 
+                    TIME_FORMAT(heure_fermeture, '%H:%i') as fermeture 
+                    FROM horaire 
+                    WHERE enseigne_id = :enseigne_id 
+                    ORDER BY FIELD(jour, 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'),
+                    heure_ouverture ASC";
+            
+            $stmt = $conn->prepare($sql);
+            $result = $stmt->executeQuery(['enseigne_id' => $id]);
+            $rawHoraires = $result->fetchAllAssociative();
+            
+            $horaires = array_map(function ($h) {
+                return [
+                    'jour' => strtoupper($h['jour']),
+                    'heures' => [
+                        'ouverture' => $h['ouverture'],
+                        'fermeture' => $h['fermeture']
+                    ]
+                ];
+            }, $rawHoraires);
+
+            return $this->json(['horaires' => $horaires]);
+            
+        } catch (\Throwable $e) {
+            error_log('Exception dans getHoraires: ' . $e->getMessage());
+            
+            return $this->json([
+                'horaires' => [
+                    ['jour' => 'LUNDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
+                    ['jour' => 'MARDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
+                    ['jour' => 'MERCREDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
+                    ['jour' => 'JEUDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
+                    ['jour' => 'VENDREDI', 'heures' => ['ouverture' => '09:00', 'fermeture' => '18:00']],
+                    ['jour' => 'SAMEDI', 'heures' => ['ouverture' => '10:00', 'fermeture' => '17:00']],
+                    ['jour' => 'DIMANCHE', 'heures' => ['ouverture' => '10:00', 'fermeture' => '15:00']]
+                ],
+                'error' => $e->getMessage()
+            ], 200);
+        }
+    }
+
+    #[Route('/api/enseignes/{id}', name: 'enseignes_by_id', methods: ['GET'])]
+    public function getEnseigneById(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            throw new AccessDeniedException('Non authentifié');
         }
 
-        $em->flush();
-
-        // Calcul de la note moyenne globale
-        $notePrix = $enseigne->getNotePrix();
-        $noteQualite = $enseigne->getNoteQualite();
-        $noteAmbiance = $enseigne->getNoteAmbiance();
-
-        $totalNotes = 0;
-        $nombreNotes = 0;
-
-        if ($notePrix !== null) {
-            $totalNotes += $notePrix;
-            $nombreNotes++;
+        $enseigne = $em->getRepository(Enseigne::class)->find($id);
+        if (!$enseigne) {
+            throw new NotFoundHttpException('Enseigne non trouvée');
         }
 
-        if ($noteQualite !== null) {
-            $totalNotes += $noteQualite;
-            $nombreNotes++;
-        }
-
-        if ($noteAmbiance !== null) {
-            $totalNotes += $noteAmbiance;
-            $nombreNotes++;
-        }
-
-        $noteMoyenne = ($nombreNotes > 0) ? ($totalNotes / $nombreNotes) : null;
+        $notes = $this->calculateAverage($enseigne, $em);
 
         return $this->json([
-            'message' => 'Avis enregistré',
-            'notePrix' => $enseigne->getNotePrix(),
-            'noteQualite' => $enseigne->getNoteQualite(),
-            'noteAmbiance' => $enseigne->getNoteAmbiance(),
-            'noteMoyenne' => round($noteMoyenne, 1)
+            'id' => $enseigne->getId(),
+            'nom' => $enseigne->getNom(),
+            'description' => $enseigne->getDescription(),
+            'adresse' => $enseigne->getAdresse(),
+            // 'gpsLocation' => $enseigne->getGpsLocation(),
+            'latitude' => $enseigne->getLatitude(),
+            'longitude' => $enseigne->getLongitude(),
+            'numeroTelephone' => $enseigne->getNumeroTelephone(),
+            'photo' => $enseigne->getPhoto(),
+            'notePrix' => $notes['prix'],
+            'noteQualite' => $notes['qualite'],
+            'noteAmbiance' => $notes['ambiance'],
+            'noteMoyenne' => $notes['moyenne'],
+            'noteACM' => [
+                'prix' => $enseigne->getNotePrix(),
+                'qualite' => $enseigne->getNoteQualite(),
+                'ambiance' => $enseigne->getNoteAmbiance()
+            ],
+            'points_cle' => $enseigne->getPointsCle(),
+            'slogan' => $enseigne->getSlogan(),
+            'categorie' => $enseigne->getCategories()->first()?->getNom() ?? 'Non classé'
+        ]);
+    }
+
+    #[Route('/api/enseignes/{id}/rate', name: 'rate_enseigne', methods: ['POST'])]
+    public function rateEnseigne(
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        LoggerInterface $logger
+    ): JsonResponse {
+        $user = $this->getUser();
+        if (!$user) {
+            throw new AccessDeniedException('Non authentifié');
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return $this->json(['message' => 'JSON invalide'], 400);
+        }
+
+        foreach (['prix', 'qualite', 'ambiance'] as $key) {
+            if (!isset($data[$key]) || $data[$key] < 1 || $data[$key] > 5) {
+                return $this->json(['message' => "Note $key invalide (1-5)"], 400);
+            }
+        }
+
+        $enseigne = $em->getRepository(Enseigne::class)->find($id);
+        if (!$enseigne) {
+            throw new NotFoundHttpException('Enseigne non trouvée');
+        }
+
+        $notation = $em->getRepository(Notation::class)->findOneBy([
+            'user' => $user,
+            'enseigne' => $enseigne
         ]);
 
-    } catch (\Exception $e) {
-        return $this->json(['message' => 'Erreur lors de la notation: ' . $e->getMessage()], 500);
+        $isNew = $notation === null;
+        if ($isNew) {
+            $notation = new Notation();
+            $notation
+                ->setUser($user)
+                ->setEnseigne($enseigne)
+                ->setDateCreation(new \DateTime());
+            
+            $logger->info('Création d\'une nouvelle notation', [
+                'user_id' => $user->getId(),
+                'enseigne_id' => $enseigne->getId()
+            ]);
+        } else {
+            $logger->info('Mise à jour d\'une notation existante', [
+                'notation_id' => $notation->getId(),
+                'user_id' => $user->getId(),
+                'enseigne_id' => $enseigne->getId()
+            ]);
+        }
+
+        $notation
+            ->setNotePrix((int)$data['prix'])
+            ->setNoteQualite((int)$data['qualite'])
+            ->setNoteAmbiance((int)$data['ambiance'])
+            ->setCommentaire($data['commentaire'] ?? null);
+
+        $em->persist($notation);
+        $em->flush();
+
+        $notes = $this->calculateAverage($enseigne, $em);
+
+        return $this->json([
+            'message' => $isNew ? 'Évaluation créée' : 'Évaluation mise à jour',
+            'notePrix' => $notes['prix'],
+            'noteQualite' => $notes['qualite'],
+            'noteAmbiance' => $notes['ambiance'],
+            'noteMoyenne' => $notes['moyenne']
+        ]);
     }
 }
-
-
-
-
-}
-*/

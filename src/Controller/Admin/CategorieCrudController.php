@@ -41,6 +41,8 @@ class CategorieCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             TextField::new('nom'),
+            TextField::new('image')->setHelp('Lien complet vers une image Cloudinary'),
+            TextField::new('couleur')->setHelp('Couleur hexadécimale (ex : #E09839)'),    
             AssociationField::new('enseignes')
                 ->onlyOnDetail()
         ];

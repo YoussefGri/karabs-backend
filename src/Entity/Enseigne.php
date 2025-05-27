@@ -25,20 +25,24 @@ class Enseigne
     #[ORM\Column(type: 'string', length: 255)]
     private string $adresse;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $latitude = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $longitude = null;
+
+
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $photo = null;
 
     #[ORM\Column(type: 'text')]
     private string $description;
 
-    #[ORM\Column(type: 'float')]
-    private float $noteSeuil;
-
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $pointsCle = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $gpsLocation;
+    // #[ORM\Column(type: 'string', length: 255)]
+    // private string $gpsLocation;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $website = null;
@@ -52,17 +56,6 @@ class Enseigne
     #[ORM\Column(type: 'float', nullable: true)]
     private ?float $noteAmbiance = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $noteACM = null;
-
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $nombreVotesPrix = 0;
-
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $nombreVotesQualite = 0;
-
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $nombreVotesAmbiance = 0;
 
     #[ORM\Column(type: 'string', length: 70, nullable: true)]
     private ?string $slogan = null;
@@ -88,9 +81,6 @@ class Enseigne
         $this->notations = new ArrayCollection();
         $this->categories = new ArrayCollection();
         $this->favoris = new ArrayCollection();
-        $this->nombreVotesPrix = 0;
-        $this->nombreVotesQualite = 0;
-        $this->nombreVotesAmbiance = 0;
     }
 
     public function getId(): ?int
@@ -141,17 +131,7 @@ class Enseigne
         $this->noteAmbiance = $noteAmbiance; 
         return $this; 
     }
-
-    public function getNoteACM(): ?float 
-    { 
-        return $this->noteACM; 
-    }
     
-    public function setNoteACM(?float $noteACM): self 
-    { 
-        $this->noteACM = $noteACM; 
-        return $this; 
-    }
     public function getSlogan(): ?string
     {
         return $this->slogan;
@@ -162,61 +142,7 @@ class Enseigne
         $this->slogan = $slogan;
         return $this;
     }
-    public function getNombreVotesPrix(): ?int
-    {
-        return $this->nombreVotesPrix;
-    }
 
-    public function setNombreVotesPrix(?int $nombreVotesPrix): self
-    {
-        $this->nombreVotesPrix = $nombreVotesPrix;
-        return $this;
-    }
-
-    public function getNombreVotesQualite(): ?int
-    {
-        return $this->nombreVotesQualite;
-    }
-
-    public function setNombreVotesQualite(?int $nombreVotesQualite): self
-    {
-        $this->nombreVotesQualite = $nombreVotesQualite;
-        return $this;
-    }
-
-    public function getNombreVotesAmbiance(): ?int
-    {
-        return $this->nombreVotesAmbiance;
-    }
-
-    public function setNombreVotesAmbiance(?int $nombreVotesAmbiance): self
-    {
-        $this->nombreVotesAmbiance = $nombreVotesAmbiance;
-        return $this;
-    }
-
-    public function getNoteMoyenne(): ?float
-    {
-        $somme = 0;
-        $count = 0;
-        
-        if ($this->notePrix !== null) {
-            $somme += $this->notePrix;
-            $count++;
-        }
-        
-        if ($this->noteQualite !== null) {
-            $somme += $this->noteQualite;
-            $count++;
-        }
-        
-        if ($this->noteAmbiance !== null) {
-            $somme += $this->noteAmbiance;
-            $count++;
-        }
-        
-        return $count > 0 ? round($somme / $count, 1) : null;
-    }
 
     public function getNumeroTelephone(): string
     {
@@ -237,6 +163,28 @@ class Enseigne
     public function setAdresse(string $adresse): self
     {
         $this->adresse = $adresse;
+        return $this;
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): self
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): self
+    {
+        $this->longitude = $longitude;
         return $this;
     }
 
@@ -262,16 +210,7 @@ class Enseigne
         return $this;
     }
 
-    public function getNoteSeuil(): float
-    {
-        return $this->noteSeuil;
-    }
 
-    public function setNoteSeuil(float $noteSeuil): self
-    {
-        $this->noteSeuil = $noteSeuil;
-        return $this;
-    }
 
     public function getPointsCle(): ?array
     {
@@ -284,16 +223,16 @@ class Enseigne
         return $this;
     }
 
-    public function getGpsLocation(): string
-    {
-        return $this->gpsLocation;
-    }
+    // public function getGpsLocation(): string
+    // {
+    //     return $this->gpsLocation;
+    // }
 
-    public function setGpsLocation(string $gpsLocation): self
-    {
-        $this->gpsLocation = $gpsLocation;
-        return $this;
-    }
+    // public function setGpsLocation(string $gpsLocation): self
+    // {
+    //     $this->gpsLocation = $gpsLocation;
+    //     return $this;
+    // }
 
     public function getWebsite(): ?string
     {
@@ -331,36 +270,6 @@ class Enseigne
         if ($this->getHoraires()->removeElement($horaire)) {
             if ($horaire->getEnseigne() === $this) {
                 $horaire->setEnseigne(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Notation>
-     */
-    public function getNotations(): Collection
-    {
-        if (!$this->notations instanceof Collection) {
-            $this->notations = new ArrayCollection();
-        }
-        return $this->notations;
-    }
-
-    public function addNotation(Notation $notation): self
-    {
-        if (!$this->getNotations()->contains($notation)) {
-            $this->getNotations()->add($notation);
-            $notation->setEnseigne($this);
-        }
-        return $this;
-    }
-
-    public function removeNotation(Notation $notation): self
-    {
-        if ($this->getNotations()->removeElement($notation)) {
-            if ($notation->getEnseigne() === $this) {
-                $notation->setEnseigne(null);
             }
         }
         return $this;
@@ -441,4 +350,9 @@ class Enseigne
     {
         return $this->nom;
     }
+    public function setPrix(float $prix): self
+    {
+        return $this->setNotePrix($prix);
+    }
+
 }

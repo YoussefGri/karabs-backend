@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
@@ -14,16 +16,29 @@ class Categorie
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups('categorie:read')]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups('categorie:read')]
     private string $nom;
 
     #[ORM\ManyToMany(targetEntity: Enseigne::class, mappedBy: 'categories')]
     private Collection $enseignes;
 
-    
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('categorie:read')]
+    private ?string $image = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Groups('categorie:read')]
+    private ?string $couleur = null;
+
+    
+    public function __toString(): string
+    {
+        return $this->nom; 
+    }
     public function __construct()
     {
         $this->enseignes = new ArrayCollection();
@@ -37,6 +52,26 @@ class Categorie
     public function getNom(): string
     {
         return $this->nom;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+    public function getCouleur(): ?string
+    {
+        return $this->couleur;
+    }
+    public function setCouleur(?string $couleur): self
+    {
+        $this->couleur = $couleur;
+        return $this;
     }
 
     public function setNom(string $nom): self

@@ -57,6 +57,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     private $plainPassword;
 
+    #[ORM\Column(nullable: true)]
+private ?string $resetToken = null;
+
+#[ORM\Column(type: 'datetime', nullable: true)]
+private ?\DateTimeInterface $resetRequestedAt = null;
+
     public function getPlainPassword(): ?string
     {
         return $this->plainPassword;
@@ -299,4 +305,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    public function __toString(): string
+    {
+        return $this->getId();  
+    }
+
+    public function getResetToken(): ?string
+{
+    return $this->resetToken;
+}
+
+public function setResetToken(?string $resetToken): self
+{
+    $this->resetToken = $resetToken;
+    return $this;
+}
+
+public function getResetRequestedAt(): ?\DateTimeInterface
+{
+    return $this->resetRequestedAt;
+}
+
+public function setResetRequestedAt(?\DateTimeInterface $resetRequestedAt): self
+{
+    $this->resetRequestedAt = $resetRequestedAt;
+    return $this;
+}
+
+
 }

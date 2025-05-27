@@ -3,11 +3,11 @@ namespace App\Enum;
 
 enum JourEnum: string
 {
-    case LUNDI = 'LUNDI';
-    case MARDI = 'MARDI';
-    case MERCREDI = 'MERCREDI';
-    case JEUDI = 'JEUDI';
-    case VENDREDI = 'VENDREDI';
-    case SAMEDI = 'SAMEDI';
-    case DIMANCHE = 'DIMANCHE';
+    case LUNDI     = 'Lundi';
+    case MARDI     = 'Mardi';
+    case MERCREDI  = 'Mercredi';
+    case JEUDI     = 'Jeudi';
+    case VENDREDI  = 'Vendredi';
+    case SAMEDI    = 'Samedi';
+    case DIMANCHE  = 'Dimanche';
 }
