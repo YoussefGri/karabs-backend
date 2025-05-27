@@ -16,5 +16,5 @@ return array (
   'JWT_SECRET_KEY' => '%kernel.project_dir%/config/jwt/private.pem',
   'JWT_PUBLIC_KEY' => '%kernel.project_dir%/config/jwt/public.pem',
   'JWT_PASSPHRASE' => '1c0d4d6861f92abcb81b77749603add5e43b840238a206cb5810137012f3471d',
-  'CORS_ALLOW_ORIGIN' => '^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?$',
+  'CORS_ALLOW_ORIGIN' => '^https?://(localhost|127\.0\.0\.1|karabs-front\.vercel\.app)(:[0-9]+)?$'
 );
