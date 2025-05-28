@@ -22,10 +22,21 @@ class AdminSecurityController extends AbstractController
         // Dernier nom d'utilisateur saisi
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // return $this->render('admin/login.html.twig', [
+        //     'last_username' => $lastUsername,
+        //     'error' => $error
+        // ]);
         return $this->render('admin/login.html.twig', [
             'last_username' => $lastUsername,
-            'error' => $error
+            'error' => $error,
+            'logout_setup' => true,
+            'username_label' => 'Email',
+            'username_field' => 'email',
+            'username_is_email' => true,
+            'support_remember_me' => true,
+            'always_remember_me' => false,
         ]);
+
     }
 
     #[Route('/admin/logout', name: 'admin_logout')]
