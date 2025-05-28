@@ -11,19 +11,24 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 (new Dotenv())->bootEnv(dirname(__DIR__) . '/.env');
 
 // PATCH CORS manuel
-$origin = $_ENV['APP_DEBUG'] === '1'
-    ? ($_SERVER['HTTP_ORIGIN'] ?? '*')
-    : 'https://karabs-front.vercel.app';
-
-header('Access-Control-Allow-Origin: ' . rtrim($origin, '/'));
-header('Access-Control-Allow-Headers: X-Requested-With, Content-Type, Authorization, withCredentials');
+$allowedOrigins = [
+    'https://karabs-front.vercel.app',
+    'http://localhost:8100',
+    'http://127.0.0.1:8100',
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header("Access-Control-Allow-Credentials: true");
+}
+header('Access-Control-Allow-Headers: X-Requested-With, Content-Type, Authorization');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Credentials: true');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
+
 
 // Démarre Symfony
 $kernel = new Kernel($_ENV['APP_ENV'], (bool) $_ENV['APP_DEBUG']);
