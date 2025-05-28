@@ -57,7 +57,7 @@ class __TwigTemplate_6e580a2fe1a450164c7a10c82c9aae5d extends Template
         // line 4
         $this->env->getRuntime("Symfony\\Component\\Form\\FormRenderer")->setTheme(($context["edit_form"] ?? null), CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "crud", [], "any", false, false, false, 4), "formThemes", [], "any", false, false, false, 4), false);
         // line 6
-        $context["__internal_73f6eea119de0f1b7db59c16ee0427d209aad4ac85061165ad9b6d23d5bf75be"] = CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "i18n", [], "any", false, false, false, 6), "translationDomain", [], "any", false, false, false, 6);
+        $context["__internal_8ff099972d3acbc0e12a6f6ebac64d550483fb12b3795a4bae7cbe70e99c68ca"] = CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "i18n", [], "any", false, false, false, 6), "translationDomain", [], "any", false, false, false, 6);
         // line 11
         $context["ea_field_assets"] = CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "crud", [], "any", false, false, false, 11), "fieldAssets", [Twig\Extension\CoreExtension::constant("EasyCorp\\Bundle\\EasyAdminBundle\\Config\\Crud::PAGE_EDIT")], "method", false, false, false, 11);
         // line 3
@@ -219,9 +219,9 @@ class __TwigTemplate_6e580a2fe1a450164c7a10c82c9aae5d extends Template
         // line 46
         yield (((null === ($context["custom_page_title"] ?? null))) ? ($this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->trans(CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source,         // line 47
 ($context["ea"] ?? null), "crud", [], "any", false, false, false, 47), "defaultPageTitle", [null, null, CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "i18n", [], "any", false, false, false, 47), "translationParameters", [], "any", false, false, false, 47)], "method", false, false, false, 47), [],         // line 6
-($context["__internal_73f6eea119de0f1b7db59c16ee0427d209aad4ac85061165ad9b6d23d5bf75be"] ?? null))) : ($this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->trans(        // line 48
+($context["__internal_8ff099972d3acbc0e12a6f6ebac64d550483fb12b3795a4bae7cbe70e99c68ca"] ?? null))) : ($this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->trans(        // line 48
 ($context["custom_page_title"] ?? null), [],         // line 6
-($context["__internal_73f6eea119de0f1b7db59c16ee0427d209aad4ac85061165ad9b6d23d5bf75be"] ?? null))));
+($context["__internal_8ff099972d3acbc0e12a6f6ebac64d550483fb12b3795a4bae7cbe70e99c68ca"] ?? null))));
         yield from [];
     }
 
