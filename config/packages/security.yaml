@@ -36,7 +36,8 @@ security:
             # Utilisez un authenticator personnalisé pour l'admin
             custom_authenticator: App\Security\AdminAuthenticator
             logout:
-                #path: app_logout
+                # path: app_logout
+                # target: admin_login
                 path: admin_logout
                 target: admin_login
 
