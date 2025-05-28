@@ -4,88 +4,118 @@
 
 {% block body %}
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
     .login-container {
         height: 100vh;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         display: flex;
         align-items: center;
         justify-content: center;
+        animation: fadeIn 1s ease;
     }
-    
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
     .login-card {
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.97);
         border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
         width: 100%;
-        max-width: 400px;
-        padding: 2.5rem;
-        transition: all 0.3s ease;
+        max-width: 420px;
+        padding: 3rem 2.5rem;
     }
-    
-    .login-card:hover {
-        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
-    }
-    
+
     .login-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
     }
-    
+
     .login-header h1 {
         font-weight: 700;
         color: #2d3748;
         margin-bottom: 0.5rem;
+        font-size: 1.6rem;
     }
-    
+
     .form-control {
-        border-radius: 10px;
-        padding: 1rem;
+        border-radius: 12px;
+        padding: 0.9rem 1.1rem;
         border: 2px solid #e2e8f0;
         transition: border-color 0.3s ease;
+        width: 100%;
+        font-size: 1rem;
     }
-    
+
     .form-control:focus {
         border-color: #667eea;
-        box-shadow: none;
+        outline: none;
     }
-    
+
     .input-label {
         color: #4a5568;
-        font-weight: 500;
-        margin-bottom: 0.5rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        display: block;
     }
-    
+
     .login-btn {
         background: #667eea;
         color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 10px;
+        padding: 0.9rem;
+        border-radius: 12px;
         font-weight: 600;
+        font-size: 1rem;
         transition: all 0.3s ease;
         width: 100%;
         border: none;
-        margin-top: 1rem;
+        margin-top: 1.2rem;
     }
-    
+
     .login-btn:hover {
-        background: #764ba2;
-        transform: translateY(-2px);
+        background: #5a67d8;
+        transform: translateY(-1px);
     }
-    
+
     .alert-danger {
         background: #fed7d7;
         color: #c53030;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 1rem;
         margin-bottom: 1.5rem;
-        border: 2px solid #feb2b2;
+        border: 1px solid #feb2b2;
+        font-size: 0.95rem;
+    }
+
+    .forgot-link {
+        display: block;
+        text-align: center;
+        margin-top: 1.2rem;
+        font-size: 0.95rem;
+        color: #667eea;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .forgot-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
     }
 </style>
 
 <div class="login-container">
     <div class="login-card">
         <div class="login-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-person-circle text-primary mb-3" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#667eea" class="mb-3" viewBox="0 0 16 16">
                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
                 <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
             </svg>
