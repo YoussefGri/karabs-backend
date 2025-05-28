@@ -86,7 +86,7 @@ class __TwigTemplate_285487ebd74acf35d96fadf98d634736 extends Template
     {
         $macros = $this->macros;
         // line 2
-        $context["__internal_edfc5a3dce1863dd89ffe89ff1bf29c4c294434b07f5c88cb87d3085bf92296e"] = CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "i18n", [], "any", false, false, false, 2), "translationDomain", [], "any", false, false, false, 2);
+        $context["__internal_c30595babaec0102b26762a3e64f6e38ec3e4ab4ce74a87ac6caf5e2250bd962"] = CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "i18n", [], "any", false, false, false, 2), "translationDomain", [], "any", false, false, false, 2);
         // line 3
         yield "
 <!DOCTYPE html>
@@ -625,7 +625,7 @@ class __TwigTemplate_285487ebd74acf35d96fadf98d634736 extends Template
                             ";
                     // line 95
                     yield $this->env->getRuntime('Symfony\UX\TwigComponent\Twig\ComponentRuntime')->render("ea:ActionMenu:ActionList:Header", ["label" => $this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->trans(CoreExtension::getAttribute($this->env, $this->source, $context["item"], "label", [], "any", false, false, false, 95), [],                     // line 2
-($context["__internal_edfc5a3dce1863dd89ffe89ff1bf29c4c294434b07f5c88cb87d3085bf92296e"] ?? null)), "class" => CoreExtension::getAttribute($this->env, $this->source,                     // line 95
+($context["__internal_c30595babaec0102b26762a3e64f6e38ec3e4ab4ce74a87ac6caf5e2250bd962"] ?? null)), "class" => CoreExtension::getAttribute($this->env, $this->source,                     // line 95
 $context["item"], "cssClass", [], "any", false, false, false, 95), "icon" => CoreExtension::getAttribute($this->env, $this->source, $context["item"], "icon", [], "any", false, false, false, 95), "htmlAttributes" => CoreExtension::getAttribute($this->env, $this->source, $context["item"], "htmlAttributes", [], "any", false, false, false, 95)]);
                     yield "
                         ";
@@ -633,7 +633,7 @@ $context["item"], "cssClass", [], "any", false, false, false, 95), "icon" => Cor
                     // line 97
                     yield "                            ";
                     yield $this->env->getRuntime('Symfony\UX\TwigComponent\Twig\ComponentRuntime')->render("ea:ActionMenu:ActionList:Item", ["label" => $this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->trans(CoreExtension::getAttribute($this->env, $this->source, $context["item"], "label", [], "any", false, false, false, 97), [],                     // line 2
-($context["__internal_edfc5a3dce1863dd89ffe89ff1bf29c4c294434b07f5c88cb87d3085bf92296e"] ?? null)), "class" => ("user-action " . CoreExtension::getAttribute($this->env, $this->source,                     // line 97
+($context["__internal_c30595babaec0102b26762a3e64f6e38ec3e4ab4ce74a87ac6caf5e2250bd962"] ?? null)), "class" => ("user-action " . CoreExtension::getAttribute($this->env, $this->source,                     // line 97
 $context["item"], "cssClass", [], "any", false, false, false, 97)), "icon" => CoreExtension::getAttribute($this->env, $this->source, $context["item"], "icon", [], "any", false, false, false, 97), "url" => CoreExtension::getAttribute($this->env, $this->source, $context["item"], "linkUrl", [], "any", false, false, false, 97), "target" => CoreExtension::getAttribute($this->env, $this->source, $context["item"], "linkTarget", [], "any", false, false, false, 97), "rel" => CoreExtension::getAttribute($this->env, $this->source, $context["item"], "linkRel", [], "any", false, false, false, 97), "referrerpolicy" => "origin-when-cross-origin", "htmlAttributes" => CoreExtension::getAttribute($this->env, $this->source, $context["item"], "htmlAttributes", [], "any", false, false, false, 97)]);
                     yield "
                         ";
@@ -1031,7 +1031,7 @@ $context["item"], "cssClass", [], "any", false, false, false, 97)), "icon" => Co
         yield (((CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["app"] ?? null), "request", [], "any", false, true, false, 276), "query", [], "any", false, true, false, 276), "get", ["query"], "method", true, true, false, 276) &&  !(null === CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["app"] ?? null), "request", [], "any", false, false, false, 276), "query", [], "any", false, false, false, 276), "get", ["query"], "method", false, false, false, 276)))) ? ($this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["app"] ?? null), "request", [], "any", false, false, false, 276), "query", [], "any", false, false, false, 276), "get", ["query"], "method", false, false, false, 276), "html", null, true)) : (""));
         yield "\" placeholder=\"";
         yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape($this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->trans($this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->createTranslatable("action.search", CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "i18n", [], "any", false, false, false, 276), "translationParameters", [], "any", false, false, false, 276), "EasyAdminBundle"), [],         // line 2
-($context["__internal_edfc5a3dce1863dd89ffe89ff1bf29c4c294434b07f5c88cb87d3085bf92296e"] ?? null)), "html", null, true);
+($context["__internal_c30595babaec0102b26762a3e64f6e38ec3e4ab4ce74a87ac6caf5e2250bd962"] ?? null)), "html", null, true);
         // line 276
         yield "\" spellcheck=\"false\" autocorrect=\"off\" onInput=\"this.parentNode.dataset.value=this.value\"";
         if (((CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "crud", [], "any", false, false, false, 276), "currentAction", [], "any", false, false, false, 276) == "index") && (CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "crud", [], "any", false, false, false, 276), "autofocusSearch", [], "any", false, false, false, 276) == true))) {
@@ -1356,7 +1356,7 @@ $context["item"], "cssClass", [], "any", false, false, false, 97)), "icon" => Co
             // line 334
             yield "                                                            <a tabindex=\"0\" class=\"content-header-help\" data-bs-toggle=\"popover\" data-bs-custom-class=\"ea-content-help-popover\" data-bs-animation=\"true\" data-bs-html=\"true\" data-bs-placement=\"bottom\" data-bs-trigger=\"focus\" data-bs-content=\"";
             yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape($this->extensions['Symfony\Bridge\Twig\Extension\TranslationExtension']->trans(CoreExtension::getAttribute($this->env, $this->source, CoreExtension::getAttribute($this->env, $this->source, ($context["ea"] ?? null), "crud", [], "any", false, false, false, 334), "helpMessage", [], "any", false, false, false, 334), [],             // line 2
-($context["__internal_edfc5a3dce1863dd89ffe89ff1bf29c4c294434b07f5c88cb87d3085bf92296e"] ?? null)), "html");
+($context["__internal_c30595babaec0102b26762a3e64f6e38ec3e4ab4ce74a87ac6caf5e2250bd962"] ?? null)), "html");
             // line 334
             yield "\">
                                                                 ";
