@@ -13,26 +13,15 @@
 #             allow_methods: ['POST', 'PUT', 'GET', 'DELETE', 'OPTIONS']
 #             max_age: 3600
 
-# nelmio_cors:
-#   defaults:
-#     origin_regex: true
-#     allow_origin: ['^https?://localhost(:[0-9]+)?$', '^https?://karabs-front.vercel.app$']
-#     allow_headers: ['Content-Type', 'Authorization']
-#     allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
-#     max_age: 3600
-#     allow_credentials: true
-#   paths:
-#     '^/': ~
 nelmio_cors:
   defaults:
     origin_regex: true
-    allow_origin: ['^https?://localhost(:[0-9]+)?$', 'https://karabs-front.vercel.app']
+    allow_origin: ['^https?://localhost(:[0-9]+)?$', '^https?://karabs-front.vercel.app$']
     allow_headers: ['Content-Type', 'Authorization']
     allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
-    expose_headers: ['Link']
     max_age: 3600
     allow_credentials: true
   paths:
-    '^/': null
+    '^/': ~
 
 
