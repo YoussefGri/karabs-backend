@@ -22,6 +22,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityDeletedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Security;
+use App\Form\HoraireType;
 
 class EnseigneCrudController extends AbstractCrudController //implements EventSubscriberInterface
 {
@@ -114,7 +115,13 @@ class EnseigneCrudController extends AbstractCrudController //implements EventSu
             // NumberField::new('noteSeuil'),
             ArrayField::new('pointsCle')->hideOnIndex(),
             AssociationField::new('categories')->autocomplete(),
-            CollectionField::new('horaires')->onlyOnDetail()->setTemplatePath('admin/fields/horaires.html.twig'),
+            //CollectionField::new('horaires')->onlyOnDetail()->setTemplatePath('admin/fields/horaires.html.twig'),
+            CollectionField::new('horaires')
+            ->setEntryType(HoraireType::class)
+            ->allowAdd()
+            ->allowDelete()
+            ->setFormTypeOption('by_reference', false)
+            ->setLabel('Horaires d\'ouverture'),
             CollectionField::new('notations')->onlyOnDetail(),
             AssociationField::new('favoris')->onlyOnDetail(),
             UrlField::new('photo', 'Lien de l’image')->setHelp('Lien vers une image')->hideOnIndex(),
