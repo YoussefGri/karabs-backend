@@ -13,13 +13,14 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 class AdminSecurityController extends AbstractController
 {
 
-    private string $frontendUrl;
+    private string $frontendUrl = rtrim($_ENV['FRONTEND_URL'] ?? 'http://localhost:8100', '/');
 
-    public function __construct(ParameterBagInterface $params)
-    {
-        //$this->frontendUrl = rtrim($params->get('env(FRONTEND_URL)'), '/');
-        $this->frontendUrl = rtrim($params->get('app.frontend_url'), '/');
-    }
+    // public function __construct(ParameterBagInterface $params)
+    // {
+    //     //$this->frontendUrl = rtrim($params->get('env(FRONTEND_URL)'), '/');
+    //     $this->frontendUrl = rtrim($params->get('app.frontend_url'), '/');
+    // }
+
 
     #[Route('/admin/login', name: 'admin_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
