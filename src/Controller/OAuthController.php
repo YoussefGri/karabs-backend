@@ -14,35 +14,23 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class OAuthController extends AbstractController
 {
-
-    private ParameterBagInterface $params;
+    private string $frontendUrl;
 
     public function __construct(ParameterBagInterface $params)
     {
-        $this->params = $params;
+        try {
+            $this->frontendUrl = rtrim($params->get('app.frontend_url'), '/');
+        } catch (\Exception $e) {
+            // En production, log au lieu de die()
+            error_log('Erreur de configuration frontend_url: ' . $e->getMessage());
+            $this->frontendUrl = 'https://karabs-front.vercel.app'; // fallback 
+        }
     }
-
-    // #[Route('/connect/{provider}', name: 'connect_oauth')]
-    // public function connectAction(string $provider, ClientRegistry $clientRegistry, Request $request): Response
-    // {
-    //     // $redirectUrl = $request->query->get('redirect_url', 'http://localhost:8100');
-    //     $frontendUrl = rtrim($this->params->get('app.frontend_url'), '/');
-    //     $redirectUrl = $request->getSession()->get('oauth_redirect_url', $frontendUrl);
-
-    //     $session = $request->getSession();
-    //     $session->set('oauth_redirect_url', $redirectUrl);
-
-    //     return $clientRegistry
-    //         ->getClient($provider)
-    //         ->redirect(['email', 'profile'], []);
-    // }  
-     
 
     #[Route('/connect/{provider}', name: 'connect_oauth')]
     public function connectAction(string $provider, ClientRegistry $clientRegistry, Request $request): Response
     {
-        $frontendUrl = rtrim($this->params->get('app.frontend_url'), '/');
-        $redirectUrl = $request->query->get('redirect_url', $frontendUrl);
+        $redirectUrl = $request->query->get('redirect_url', $this->frontendUrl);
 
         $session = $request->getSession();
         if (!$session->isStarted()) {
@@ -54,5 +42,50 @@ class OAuthController extends AbstractController
             ->getClient($provider)
             ->redirect(['email', 'profile'], []);
     }
-
 }
+
+
+// class OAuthController extends AbstractController
+// {
+
+//     private ParameterBagInterface $params;
+
+//     public function __construct(ParameterBagInterface $params)
+//     {
+//         $this->params = $params;
+//     }
+
+//     // #[Route('/connect/{provider}', name: 'connect_oauth')]
+//     // public function connectAction(string $provider, ClientRegistry $clientRegistry, Request $request): Response
+//     // {
+//     //     // $redirectUrl = $request->query->get('redirect_url', 'http://localhost:8100');
+//     //     $frontendUrl = rtrim($this->params->get('app.frontend_url'), '/');
+//     //     $redirectUrl = $request->getSession()->get('oauth_redirect_url', $frontendUrl);
+
+//     //     $session = $request->getSession();
+//     //     $session->set('oauth_redirect_url', $redirectUrl);
+
+//     //     return $clientRegistry
+//     //         ->getClient($provider)
+//     //         ->redirect(['email', 'profile'], []);
+//     // }  
+     
+
+//     #[Route('/connect/{provider}', name: 'connect_oauth')]
+//     public function connectAction(string $provider, ClientRegistry $clientRegistry, Request $request): Response
+//     {
+//         $frontendUrl = rtrim($this->params->get('app.frontend_url'), '/');
+//         $redirectUrl = $request->query->get('redirect_url', $frontendUrl);
+
+//         $session = $request->getSession();
+//         if (!$session->isStarted()) {
+//             $session->start();
+//         }
+//         $session->set('oauth_redirect_url', $redirectUrl);
+
+//         return $clientRegistry
+//             ->getClient($provider)
+//             ->redirect(['email', 'profile'], []);
+//     }
+
+// }
