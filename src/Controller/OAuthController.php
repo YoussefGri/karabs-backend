@@ -52,6 +52,9 @@ class OAuthController extends AbstractController
     ): Response {
         try {
             $client = $clientRegistry->getClient('google');
+
+             dd($client->getRedirectUrl());
+
             $googleUser = $client->fetchUser();
 
             $existingUser = $em->getRepository(User::class)->findOneBy([
