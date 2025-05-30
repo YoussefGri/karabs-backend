@@ -12,7 +12,7 @@ return array (
   'MAILER_FROM_NAME' => 'Le Karabs App',
   'GOOGLE_CLIENT_ID' => '302695246353-43jqkl03ncpqe1dua62n9n0ulq4nf5ns.apps.googleusercontent.com',
   'GOOGLE_CLIENT_SECRET' => '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',
-  'FRONTEND_URL' => 'http://localhost:8100',
+  'FRONTEND_URL' => 'https://karabs-front.vercel.app',
   'JWT_SECRET_KEY' => '%kernel.project_dir%/config/jwt/private.pem',
   'JWT_PUBLIC_KEY' => '%kernel.project_dir%/config/jwt/public.pem',
   'JWT_PASSPHRASE' => '1c0d4d6861f92abcb81b77749603add5e43b840238a206cb5810137012f3471d',
