@@ -200,19 +200,24 @@ class __TwigTemplate_0cba4c18f1671dfa3c5f40a809aae458 extends Template
         yield "
             <div class=\"mb-4\">
                 <label class=\"input-label\" for=\"inputEmail\">Email</label>
-                <input type=\"email\" value=\"";
-        // line 132
+                ";
+        // line 133
+        yield "                <input type=\"email\" value=\"";
         yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape(($context["last_username"] ?? null), "html", null, true);
-        yield "\" name=\"email\" id=\"inputEmail\" class=\"form-control\" autocomplete=\"email\" required autofocus>
+        yield "\" name=\"_username\" id=\"inputEmail\" class=\"form-control\" autocomplete=\"email\" required autofocus>
+
             </div>
 
             <div class=\"mb-4\">
                 <label class=\"input-label\" for=\"inputPassword\">Mot de passe</label>
-                <input type=\"password\" name=\"password\" id=\"inputPassword\" class=\"form-control\" autocomplete=\"current-password\" required>
+                ";
+        // line 140
+        yield "                <input type=\"password\" name=\"_password\" id=\"inputPassword\" class=\"form-control\" autocomplete=\"current-password\" required>
+
             </div>
 
             <input type=\"hidden\" name=\"_csrf_token\" value=\"";
-        // line 140
+        // line 144
         yield $this->env->getRuntime('Twig\Runtime\EscaperRuntime')->escape($this->env->getRuntime('Symfony\Component\Form\FormRenderer')->renderCsrfToken("authenticate"), "html", null, true);
         yield "\">
 
@@ -247,7 +252,7 @@ class __TwigTemplate_0cba4c18f1671dfa3c5f40a809aae458 extends Template
      */
     public function getDebugInfo(): array
     {
-        return array (  216 => 140,  205 => 132,  200 => 129,  194 => 127,  192 => 126,  70 => 6,  63 => 5,  52 => 3,  41 => 1,);
+        return array (  221 => 144,  215 => 140,  205 => 133,  200 => 129,  194 => 127,  192 => 126,  70 => 6,  63 => 5,  52 => 3,  41 => 1,);
     }
 
     public function getSourceContext(): Source
