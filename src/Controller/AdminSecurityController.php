@@ -17,7 +17,9 @@ class AdminSecurityController extends AbstractController
 
     public function __construct(ParameterBagInterface $params)
     {
-        $this->frontendUrl = rtrim($params->get('env(FRONTEND_URL)'), '/');
+        //$this->frontendUrl = rtrim($params->get('env(FRONTEND_URL)'), '/');
+        $this->frontendUrl = rtrim($_ENV['FRONTEND_URL'] ?? 'http://localhost:8100', '/');
+
     }
 
     #[Route('/admin/login', name: 'admin_login')]
