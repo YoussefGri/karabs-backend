@@ -29,15 +29,25 @@ security:
             stateless: true
             jwt: ~
 
+        # admin:
+        #     pattern: ^/admin
+        #     lazy: true
+        #     provider: app_user_provider
+        #     # Utilisez un authenticator personnalisé pour l'admin
+        #     custom_authenticator: App\Security\AdminAuthenticator
+        #     logout:
+        #         # path: app_logout
+        #         # target: admin_login
+        #         path: admin_logout
+        #         target: /login
         admin:
             pattern: ^/admin
-            lazy: true
             provider: app_user_provider
-            # Utilisez un authenticator personnalisé pour l'admin
-            custom_authenticator: App\Security\AdminAuthenticator
+            form_login:
+                login_path: admin_login
+                check_path: admin_login
+                enable_csrf: true
             logout:
-                # path: app_logout
-                # target: admin_login
                 path: admin_logout
                 target: /login
 
@@ -52,8 +62,8 @@ security:
 
     access_control:
     - { path: ^/admin/login, roles: PUBLIC_ACCESS }
-    - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/admin/logout, roles: PUBLIC_ACCESS }
+    - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
     - { path: ^/api/register, roles: PUBLIC_ACCESS }
     - { path: ^/api/reset-password, roles: PUBLIC_ACCESS }  

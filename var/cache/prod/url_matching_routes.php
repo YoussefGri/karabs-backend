@@ -36,6 +36,7 @@ return [
         '/admin' => [[['_route' => 'admin', '_controller' => 'App\\Controller\\Admin\\DashboardController::index'], null, null, null, false, false, null]],
         '/admin/login' => [[['_route' => 'admin_login', '_controller' => 'App\\Controller\\AdminSecurityController::login'], null, null, null, false, false, null]],
         '/admin/logout' => [[['_route' => 'admin_logout', '_controller' => 'App\\Controller\\AdminSecurityController::logout'], null, null, null, false, false, null]],
+        '/login' => [[['_route' => 'app_login', '_controller' => 'App\\Controller\\AdminSecurityController::mainLogin'], null, null, null, false, false, null]],
         '/api/user/me' => [[['_route' => 'api_user_me', '_controller' => 'App\\Controller\\AuthController::me'], null, ['GET' => 0], null, false, false, null]],
         '/api/categories' => [[['_route' => 'api_categories', '_controller' => 'App\\Controller\\CategorieController::index'], null, ['GET' => 0], null, false, false, null]],
         '/api/map' => [[['_route' => 'map_enseignes', '_controller' => 'App\\Controller\\EnseigneController::getEnseignesForMap'], null, ['GET' => 0], null, false, false, null]],

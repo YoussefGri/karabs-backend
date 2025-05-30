@@ -17,39 +17,65 @@ class AdminSecurityController extends AbstractController
 
     public function __construct(ParameterBagInterface $params)
     {
-        $this->frontendUrl = rtrim($params->get('app.frontend_url'), '/');
+        // $this->frontendUrl = rtrim($params->get('app.frontend_url'), '/');
+            try {
+             $this->frontendUrl = rtrim($params->get('app.frontend_url'), '/');
+            } catch (\Exception $e) {
+                die('Erreur ParameterBag: '.$e->getMessage());
+            }
     }
-
 
     #[Route('/admin/login', name: 'admin_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // Si l'utilisateur est déjà connecté, redirigez-le vers le tableau de bord
-        if ($this->getUser() && in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
-            return $this->redirectToRoute('admin');
+        try {
+            if ($this->getUser() && in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+                return $this->redirectToRoute('admin');
+            }
+
+            $error = $authenticationUtils->getLastAuthenticationError();
+            $lastUsername = $authenticationUtils->getLastUsername();
+
+            return $this->render('admin/login.html.twig', [
+                'last_username' => $lastUsername,
+                'error' => $error
+            ]);
+        } catch (\Exception $e) {
+            // Log the error or handle it appropriately
+            throw new \RuntimeException('Login failed: '.$e->getMessage());
         }
-
-        // Récupérer l'erreur de connexion s'il y en a une
-        $error = $authenticationUtils->getLastAuthenticationError();
-        // Dernier nom d'utilisateur saisi
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        return $this->render('admin/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error
-        ]);
-        // return $this->render('admin/login.html.twig', [
-        //     'last_username' => $lastUsername,
-        //     'error' => $error,
-        //     'logout_setup' => true,
-        //     'username_label' => 'Email',
-        //     'username_field' => 'email',
-        //     'username_is_email' => true,
-        //     'support_remember_me' => true,
-        //     'always_remember_me' => false,
-        // ]);
-
     }
+
+
+    // #[Route('/admin/login', name: 'admin_login')]
+    // public function login(AuthenticationUtils $authenticationUtils): Response
+    // {
+    //     // Si l'utilisateur est déjà connecté, redirigez-le vers le tableau de bord
+    //     if ($this->getUser() && in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+    //         return $this->redirectToRoute('admin');
+    //     }
+
+    //     // Récupérer l'erreur de connexion s'il y en a une
+    //     $error = $authenticationUtils->getLastAuthenticationError();
+    //     // Dernier nom d'utilisateur saisi
+    //     $lastUsername = $authenticationUtils->getLastUsername();
+
+    //     return $this->render('admin/login.html.twig', [
+    //         'last_username' => $lastUsername,
+    //         'error' => $error
+    //     ]);
+    //     // return $this->render('admin/login.html.twig', [
+    //     //     'last_username' => $lastUsername,
+    //     //     'error' => $error,
+    //     //     'logout_setup' => true,
+    //     //     'username_label' => 'Email',
+    //     //     'username_field' => 'email',
+    //     //     'username_is_email' => true,
+    //     //     'support_remember_me' => true,
+    //     //     'always_remember_me' => false,
+    //     // ]);
+
+    // }
 
     // #[Route('/admin/logout', name: 'admin_logout')]
     // public function logout(): void
