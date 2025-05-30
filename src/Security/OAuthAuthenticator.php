@@ -18,23 +18,28 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
 class OAuthAuthenticator extends OAuth2Authenticator implements AuthenticationEntryPointInterface
 {
     private $clientRegistry;
     private $entityManager;
     private $router;
-    private $JWTManager; // Ajoutez cette propriété
+    private $JWTManager;
+    private $frontendUrl;
 
     public function __construct(
         ClientRegistry $clientRegistry,
         EntityManagerInterface $entityManager,
         RouterInterface $router,
-        JWTTokenManagerInterface $JWTManager // Injectez JWTTokenManagerInterface
-    ) {
+        JWTTokenManagerInterface $JWTManager,
+        ParameterBagInterface $params
+        ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->router = $router;
-        $this->JWTManager = $JWTManager; // Initialisez la propriété
+        $this->JWTManager = $JWTManager;
+        $this->frontendUrl = rtrim($params->get('app.frontend_url'), '/'); 
     }
 
     public function supports(Request $request): ?bool
@@ -100,7 +105,8 @@ class OAuthAuthenticator extends OAuth2Authenticator implements AuthenticationEn
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        $redirectUrl = $request->getSession()->get('oauth_redirect_url', 'http://localhost:8100');
+        //$redirectUrl = $request->getSession()->get('oauth_redirect_url', 'http://localhost:8100');
+        $redirectUrl = $request->getSession()->get('oauth_redirect_url', $this->frontendUrl);
         $request->getSession()->remove('oauth_redirect_url');
 
         // Utilisez $this->JWTManager pour générer le token JWT
