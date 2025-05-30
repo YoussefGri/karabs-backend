@@ -39,7 +39,7 @@ security:
                 # path: app_logout
                 # target: admin_login
                 path: admin_logout
-                target: admin_login
+                target: /login
 
         main:
             lazy: true
@@ -48,6 +48,7 @@ security:
                 - App\Security\OAuthAuthenticator
             logout:
                 path: app_logout
+
 
     access_control:
     - { path: ^/admin/login, roles: PUBLIC_ACCESS }

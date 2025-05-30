@@ -36,7 +36,6 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-users', User::class);
-        // Ajoutez d'autres éléments de menu pour vos entités
         // Section Enseignes
         yield MenuItem::section('Gestion Commerces');
         yield MenuItem::linkToCrud('Enseignes', 'fas fa-store', Enseigne::class)
@@ -53,8 +52,13 @@ class DashboardController extends AbstractDashboardController
         
         // Liens utiles
         yield MenuItem::section('Navigation');
+
+        // deconnexion
+        yield MenuItem::linkToLogout('Déconnexion', 'fas fa-sign-out-alt');
         
         // Lien vers le site principal
-        yield MenuItem::linkToUrl('Retour au Karabs', 'fas fa-arrow-left', '/admin');
+        //yield MenuItem::linkToUrl('Retour au Karabs', 'fas fa-arrow-left', '/admin');
+        yield MenuItem::linkToUrl('Retour au Karabs', 'fas fa-arrow-left', '/login');
+
     }
 }

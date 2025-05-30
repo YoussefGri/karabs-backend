@@ -6,9 +6,20 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class AdminSecurityController extends AbstractController
 {
+
+    private string $frontendUrl;
+
+    public function __construct(ParameterBagInterface $params)
+    {
+        $this->frontendUrl = rtrim($params->get('env(FRONTEND_URL)'), '/');
+    }
+
     #[Route('/admin/login', name: 'admin_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -22,28 +33,52 @@ class AdminSecurityController extends AbstractController
         // Dernier nom d'utilisateur saisi
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        // return $this->render('admin/login.html.twig', [
-        //     'last_username' => $lastUsername,
-        //     'error' => $error
-        // ]);
         return $this->render('admin/login.html.twig', [
             'last_username' => $lastUsername,
-            'error' => $error,
-            'logout_setup' => true,
-            'username_label' => 'Email',
-            'username_field' => 'email',
-            'username_is_email' => true,
-            'support_remember_me' => true,
-            'always_remember_me' => false,
+            'error' => $error
         ]);
+        // return $this->render('admin/login.html.twig', [
+        //     'last_username' => $lastUsername,
+        //     'error' => $error,
+        //     'logout_setup' => true,
+        //     'username_label' => 'Email',
+        //     'username_field' => 'email',
+        //     'username_is_email' => true,
+        //     'support_remember_me' => true,
+        //     'always_remember_me' => false,
+        // ]);
 
     }
+
+    // #[Route('/admin/logout', name: 'admin_logout')]
+    // public function logout(): void
+    // {
+        
+    //     // Cette méthode peut rester vide, elle sera interceptée par le firewall
+    //     throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+    // }
 
     #[Route('/admin/logout', name: 'admin_logout')]
-    public function logout(): void
+    public function logout(TokenStorageInterface $tokenStorage, SessionInterface $session): Response
     {
+        // Supprimer le token d'authentification
+        $tokenStorage->setToken(null);
         
-        // Cette méthode peut rester vide, elle sera interceptée par le firewall
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        // Invalider la session
+        $session->invalidate();
+        
+        // Rediriger directement vers /login avec l'URL complète
+        return $this->redirect('/login');
     }
+
+    // Route /login - votre page de login principale
+    #[Route('/login', name: 'app_login')]
+    public function mainLogin(): Response
+    {
+        // return $this->redirect('http://localhost:8100/login'); // ton app Ionic
+        return $this->redirect($this->frontendUrl . '/login');
+
+    }
+
+    
 }
