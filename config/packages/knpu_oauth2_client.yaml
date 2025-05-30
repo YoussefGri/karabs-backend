@@ -7,3 +7,4 @@ knpu_oauth2_client:
             redirect_route: connect_google_check
             redirect_params: {}
             user_fields: ['profile', 'email']
+            redirect_uri: 'https://karabs-backend1.up.railway.app/connect/google/check'

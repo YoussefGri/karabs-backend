@@ -43,6 +43,7 @@ return [
         '/api/favoris' => [[['_route' => 'get_favoris', '_controller' => 'App\\Controller\\FavorisController::getFavoris'], null, ['GET' => 0], null, false, false, null]],
         '/api/favoris/add' => [[['_route' => 'add_favori', '_controller' => 'App\\Controller\\FavorisController::addFavori'], null, ['POST' => 0], null, false, false, null]],
         '/' => [[['_route' => 'home', '_controller' => 'App\\Controller\\HomeController::index'], null, null, null, false, false, null]],
+        '/connect/google/check' => [[['_route' => 'connect_google_check', '_controller' => 'App\\Controller\\OAuthController::connectGoogleCheckAction'], null, null, null, false, false, null]],
         '/api/register' => [[['_route' => 'api_register', '_controller' => 'App\\Controller\\RegistrationController::register'], null, ['POST' => 0], null, false, false, null]],
         '/api/reset-password/request' => [[['_route' => 'api_reset_password_request', '_controller' => 'App\\Controller\\ResetPasswordController::requestReset'], null, ['POST' => 0], null, false, false, null]],
         '/api/reset-password/reset' => [[['_route' => 'api_reset_password_reset', '_controller' => 'App\\Controller\\ResetPasswordController::resetPassword'], null, ['POST' => 0], null, false, false, null]],
