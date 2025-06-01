@@ -82,7 +82,9 @@ class OAuthController extends AbstractController
             $redirectUrl = $request->getSession()->get('oauth_redirect_url', $this->frontendUrl);
             $request->getSession()->remove('oauth_redirect_url');
 
-            return $this->redirect($redirectUrl . '/auth/callback?token=' . urlencode($token));
+            // return $this->redirect($redirectUrl . '/auth/callback?token=' . urlencode($token));
+            return $this->redirect($redirectUrl . (str_contains($redirectUrl, '?') ? '&' : '?') . 'token=' . urlencode($token));
+
 
         } catch (\Exception $e) {
             error_log($e->getMessage());
